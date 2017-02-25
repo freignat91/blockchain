@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
@@ -29,9 +29,9 @@ func (m *bchainCLI) setLogLevel(cmd *cobra.Command, args []string) error {
 	}
 	m.pInfo("Execute: setLogLevel %s\n", args[0])
 	node := cmd.Flag("node").Value.String()
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	if err := api.NodeSetLogLevel(node, args[0]); err != nil {
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	if err := tapi.NodeSetLogLevel(node, args[0]); err != nil {
 		return err
 	}
 	if node == "*" {

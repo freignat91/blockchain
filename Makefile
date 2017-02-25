@@ -27,7 +27,7 @@ TAG := latest
 
 IMAGE := $(OWNER)/$(NAME):$(TAG)
 IMAGETEST := $(OWNER)/$(NAME):test
-REPO := github.com/$(OWNER)/blockname
+REPO := github.com/$(OWNER)/blockchain
 
 CLIENT := bchain
 SERVER := server
@@ -50,7 +50,7 @@ install-server:
 install: install-server install-client
 
 proto: 
-	@protoc server/node/gnode.proto --go_out=plugins=grpc:.
+	@protoc server/gnode/gnode.proto --go_out=plugins=grpc:.
 
 # format and simplify if possible (https://golang.org/cmd/gofmt/#hdr-The_simplify_command)
 fmt:
@@ -100,4 +100,8 @@ starttest:
 	$(IMAGETEST)
 
 stop:
-	@docker service rm agrid || true
+	@docker service rm antblockchain || true
+
+init:
+	@docker service rm antblockchain || true
+	@rm -f ./logs/*

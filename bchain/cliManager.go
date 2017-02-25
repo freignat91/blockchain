@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/fatih/color"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"os"
 )
 
@@ -96,7 +96,7 @@ func (m *bchainCLI) setColors() {
 	//add theme as you want.
 }
 
-func (m *bchainCLI) setAPILogLevel(api *agridapi.AgridAPI) {
+func (m *bchainCLI) setAPILogLevel(api *api.BchainAPI) {
 	if m.silence {
 		api.SetLogLevel("error")
 	} else if m.verbose {

@@ -1,8 +1,8 @@
-package abcapi
+package api
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/server/gnode"
+	"github.com/freignat91/blockchain/server/gnode"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"io"
@@ -11,7 +11,7 @@ import (
 )
 
 type gnodeClient struct {
-	api      *AgridAPI
+	api      *BchainAPI
 	id       string
 	client   gnode.GNodeServiceClient
 	nodeName string
@@ -25,7 +25,7 @@ type gnodeClient struct {
 	nbDuplicate int
 }
 
-func (g *gnodeClient) init(api *AgridAPI) error {
+func (g *gnodeClient) init(api *BchainAPI) error {
 	g.api = api
 	g.ctx = context.Background()
 	g.recvChan = make(chan *gnode.AntMes)
@@ -123,7 +123,6 @@ func (g *gnodeClient) sendMessage(mes *gnode.AntMes, wait bool) (*gnode.AntMes, 
 	defer g.lock.Unlock()
 	mes.FromClient = g.id
 	mes.UserName = g.api.userName
-	mes.UserToken = g.api.userToken
 	//fmt.Printf("Order: %d size: %d\n", mes.Order, len(mes.Data))
 	err := g.stream.Send(mes)
 	if err != nil {

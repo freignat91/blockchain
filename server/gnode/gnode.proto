@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package gnode;
+
+service GNodeService {
+        rpc ExecuteFunction (AntMes) returns (AntRet);
+        rpc CheckReceiver (HealthRequest) returns (AntRet);
+        rpc GetClientStream (stream AntMes) returns (stream AntMes) {}
+        rpc AskConnection (AskConnectionRequest) returns (PingRet) {}
+        rpc Ping (AntMes) returns (PingRet) {}
+        rpc Healthcheck(HealthRequest) returns (AntRet) {}
+}
+
+message AntMes {
+        string id = 1;
+        string origin = 2;
+        string from_client = 3;
+        string target = 4;
+        bool isAnswer = 5;
+        bool return_answer = 6;
+        bool is_path_writer = 7;
+        string origin_id = 8;
+        repeated string path = 9;
+        int32 path_index = 10;
+        string function = 11;
+        repeated string args = 12;
+        bool debug = 13;
+        bool answer_wait = 14;
+        string errorMes = 15;
+        repeated string nodes = 16;
+        string user_name = 17;
+        DataKey key = 18;
+        bool no_blocking = 19;
+        bytes data = 20;
+}
+
+message AntRet{
+        bool ack = 1;
+        string id = 2;
+}
+
+message HealthRequest {
+        
+}
+
+message PingRet{
+        string host = 1;
+        string name = 2;
+        int32 nb_node = 3;
+        int32 nb_duplicate = 4;
+        int32 client_number = 5;
+}
+
+message AskConnectionRequest{
+        string name = 1;
+        string host = 2;
+        string ip = 3;
+}
+
+message EmptyRet{
+        
+}
+
+message DataKey{
+        int64 expo =1;
+        bytes data =2;
+}
+

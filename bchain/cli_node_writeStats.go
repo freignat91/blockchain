@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
@@ -28,9 +28,9 @@ func (m *bchainCLI) NodeWriteStats(cmd *cobra.Command, args []string) error {
 		node = args[0]
 	}
 	m.pInfo("Execute: writeTrage\n")
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	if err := api.InfoWriteStats(node); err != nil {
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	if err := tapi.InfoWriteStats(node); err != nil {
 		return err
 	}
 	m.pSuccess("Stats written for node %s\n", node)

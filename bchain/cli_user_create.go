@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
@@ -30,9 +30,9 @@ func (m *bchainCLI) userCreate(cmd *cobra.Command, args []string) error {
 	token := cmd.Flag("token").Value.String()
 	user := args[0]
 	m.pInfo("Execute: Create user %s\n", user)
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	token, err := api.UserCreate(user, token)
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	token, err := tapi.UserCreate(user, token)
 	if err != nil {
 		return err
 	}

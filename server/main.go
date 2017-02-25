@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/blockchain/server/node"
+	"github.com/freignat91/blockchain/server/gnode"
 	"log"
 	"net/http"
 	"os"
@@ -23,7 +23,7 @@ func main() {
 		}
 		os.Exit(0)
 	}
-	gnodeServer := node.GNode{}
+	gnodeServer := gnode.GNode{}
 	err := gnodeServer.Start(Version, Build)
 	if err != nil {
 		log.Printf("Exit on init error: %v\n", err)

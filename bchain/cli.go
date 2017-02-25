@@ -28,22 +28,22 @@ func cli() {
 		}
 	})
 
-	// versionCmd represents the agrid version
+	// versionCmd represents the antblockchain version
 	versionCmd := &cobra.Command{
 		Use:   "version",
-		Short: "Display the version number of agrid",
-		Long:  `Display the version number of agrid`,
+		Short: "Display the version number of antblockchain",
+		Long:  `Display the version number of antblockchain`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("antblockchain version: %s, build: %s)\n", Version, Build)
 		},
 	}
 	RootCmd.AddCommand(versionCmd)
 
-	// infoCmd represents the agrid information
+	// infoCmd represents the antblockchain information
 	infoCmd := &cobra.Command{
 		Use:   "info",
-		Short: "Display agrid version and server information",
-		Long:  `Display agrid version and server information.`,
+		Short: "Display antblockchain version and server information",
+		Long:  `Display antblockchain version and server information.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Printf("antblockchain version: %s, build: %s)\n", Version, Build)
 			fmt.Printf("Server: %s\n", config.serverAddress)

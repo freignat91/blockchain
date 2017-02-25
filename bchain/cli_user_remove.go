@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
@@ -33,9 +33,9 @@ func (m *bchainCLI) userRemove(cmd *cobra.Command, args []string) error {
 		force = true
 	}
 	m.pInfo("Execute: Remove user %s\n", user)
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	if err := api.UserRemove(user, force); err != nil {
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	if err := tapi.UserRemove(user, force); err != nil {
 		return err
 	}
 	m.pSuccess("User removed %s\n", user)

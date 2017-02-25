@@ -1,4 +1,4 @@
-package abcapi
+package api
 
 import (
 	"crypto/aes"

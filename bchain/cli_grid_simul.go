@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/freignat91/agrid/server/gnode"
+	"github.com/freignat91/blockchain/server/gnode"
 	"github.com/spf13/cobra"
 	"strconv"
 )

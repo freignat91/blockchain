@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
 // PlatformMonitor is the main command for attaching platform subcommands.
 var NodeKillCmd = &cobra.Command{
 	Use:   "kill",
-	Short: "kill an agrid node",
-	Long:  `kill an agrid node`,
+	Short: "kill an blockchain node",
+	Long:  `kill an blockchain node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.kill(cmd, args); err != nil {
 			bCLI.Fatal("Error: %v\n", err)
@@ -28,9 +28,9 @@ func (m *bchainCLI) kill(cmd *cobra.Command, args []string) error {
 	}
 	node := args[0]
 	m.pInfo("Execute: kill node %s\n", node)
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	if err := api.NodeKill(node); err != nil {
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	if err := tapi.NodeKill(node); err != nil {
 		return err
 	}
 	m.pSuccess("Container killed node %s\n", node)

@@ -33,7 +33,7 @@ func (cfg *CliConfig) loadConfigUsingEnvVariable() {
 
 //display amp-pilot configuration
 func (cfg *CliConfig) displayConfig(version string, build string) {
-	fmt.Printf("agrid version: %v build: %s\n", version, build)
+	fmt.Printf("antblockchain version: %v build: %s\n", version, build)
 	fmt.Println("----------------------------------------------------------------------------")
 	fmt.Println("Configuration:")
 	fmt.Printf("antblockchain address: %s\n", cfg.serverAddress)

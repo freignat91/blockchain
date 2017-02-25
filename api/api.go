@@ -1,4 +1,4 @@
-package abcapi
+package api
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ type BchainAPI struct {
 	userToken   string
 }
 
-// New create an Agrid api instance
+// New create an blockchain api instance
 func New(servers string) *BchainAPI {
 	serverList := strings.Split(servers, ",")
 	for i, serv := range serverList {

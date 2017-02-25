@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
@@ -37,9 +37,9 @@ func (m *bchainCLI) nodeUpdateGrid(cmd *cobra.Command, args []string) error {
 		node = args[0]
 	}
 	m.pInfo("Execute: update grid\n")
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	if err := api.NodeUpdateGrid(node, force); err != nil {
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	if err := tapi.NodeUpdateGrid(node, force); err != nil {
 		return err
 	}
 	m.pSuccess("Grid updated for node %s\n", node)

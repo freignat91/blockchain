@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -29,9 +29,9 @@ func (m *bchainCLI) nodePingFromTo(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("Needs two arguements: sender node name and targeted node name")
 	}
 	t0 := time.Now()
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	path, err := api.NodePingFromTo(args[0], args[1], m.debug)
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	path, err := tapi.NodePingFromTo(args[0], args[1], m.debug)
 	if err != nil {
 		return err
 	}

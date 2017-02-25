@@ -1,6 +1,6 @@
-# AGRID
+# AntBlockChain
 
-AntBlockChain v0.0.0
+AntBlockChain v0.0.1 on going
 
 # Purpose
 
@@ -24,7 +24,7 @@ It needsfirst Docker 1.13 installed, then
 
 - clone the git project: https://github.com/freignat91/blockchain
 - execute `make install` to build the antblockchain CLI executable
-- execute `make build` to create a image freignat91/agrid:latest
+- execute `make build` to create a image freignat91/blockchain:latest
 - execute the command `make start` to initialize swarm, create an overlay network and start the antblockchain service on this network
 
 antblockchain can't be used as a single container, it needs to be started as a service on a swarm machine (manager or worker).
@@ -57,8 +57,8 @@ To simulate nodes connections using different parameters as, node number, line c
 - <--cross yy> optionally: yy the number of cross connections 
 
 this command as not effect on the real cluster grid connections, see:
-- ./docs/Agrid-grid-building.pptx
-- ./docs/Agrid-Ant-net.pptx
+- ./docs/grid-building.pptx
+- ./docs/ant-net.pptx
 
 
 # tests
@@ -66,7 +66,7 @@ this command as not effect on the real cluster grid connections, see:
 execute: make test
 
 
-# version 0.0.0 target
+# version 0.0.1 target
 
 - Have antblockchain docker service starting with a given number of nodes. 
 - Each node etablish GRPC connections with part of the other nodes accordlying to the grid parameters, establishing a ready to work node network communication based on ant behavior.

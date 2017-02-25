@@ -1,4 +1,4 @@
-package abcapi
+package api
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 // NodeClear force a node to clear its memory
-func (api *AgridAPI) NodeClear(node string) error {
+func (api *BchainAPI) NodeClear(node string) error {
 	if node == "" {
 		node = "*"
 	}
@@ -22,7 +22,7 @@ func (api *AgridAPI) NodeClear(node string) error {
 }
 
 // NodeKill force a node to kill it-self
-func (api *AgridAPI) NodeKill(node string) error {
+func (api *BchainAPI) NodeKill(node string) error {
 	client, err := api.getClient()
 	if err != nil {
 		return err
@@ -35,7 +35,7 @@ func (api *AgridAPI) NodeKill(node string) error {
 }
 
 // NodePing ping a node
-func (api *AgridAPI) NodePing(node string, debugTrace bool) (string, error) {
+func (api *BchainAPI) NodePing(node string, debugTrace bool) (string, error) {
 	client, err := api.getClient()
 	if err != nil {
 		return "", err
@@ -59,7 +59,7 @@ func (api *AgridAPI) NodePing(node string, debugTrace bool) (string, error) {
 }
 
 // NodePingFrom ping a node from another node
-func (api *AgridAPI) NodePingFromTo(node1 string, node2 string, debugTrace bool) (string, error) {
+func (api *BchainAPI) NodePingFromTo(node1 string, node2 string, debugTrace bool) (string, error) {
 	client, err := api.getClient()
 	if err != nil {
 		return "", err
@@ -76,7 +76,7 @@ func (api *AgridAPI) NodePingFromTo(node1 string, node2 string, debugTrace bool)
 }
 
 // NodeSetLogLevel set a node log level: "error", "warn", "info", "debug"
-func (api *AgridAPI) NodeSetLogLevel(node string, logLevel string) error {
+func (api *BchainAPI) NodeSetLogLevel(node string, logLevel string) error {
 	client, err := api.getClient()
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (api *AgridAPI) NodeSetLogLevel(node string, logLevel string) error {
 	return nil
 }
 
-func (api *AgridAPI) NodeLs() ([]string, error) {
+func (api *BchainAPI) NodeLs() ([]string, error) {
 	rep := []string{}
 	client, err := api.getClient()
 	if err != nil {
@@ -118,7 +118,7 @@ func (api *AgridAPI) NodeLs() ([]string, error) {
 	return rep, nil
 }
 
-func (api *AgridAPI) NodeUpdateGrid(node string, force bool) error {
+func (api *BchainAPI) NodeUpdateGrid(node string, force bool) error {
 	client, err := api.getClient()
 	if err != nil {
 		return err

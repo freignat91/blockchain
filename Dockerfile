@@ -10,13 +10,13 @@ RUN apk update && apk upgrade && \
     go version && \
     go get -u github.com/Masterminds/glide/...
 
-COPY ./ /go/src/github.com/freignat91/agrid
+COPY ./ /go/src/github.com/freignat91/blockchain
 
-RUN cd $GOPATH/src/github.com/freignat91/agrid && \
+RUN cd $GOPATH/src/github.com/freignat91/blockchain && \
     rm -f glide.lock && \
     glide install && \
     make install && \
-    echo agrid built && \
+    echo antblockchain built && \
     chmod +x $GOPATH/bin/* && \
     cd $GOPATH && \
     rm -rf $GOPATH/src && \

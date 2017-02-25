@@ -1,4 +1,4 @@
-package: github.com/freignat91/agrid
+package: github.com/freignat91/blockchain
 import:
 - package: github.com/golang/protobuf
   subpackages:

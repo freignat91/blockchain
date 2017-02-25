@@ -1,15 +1,15 @@
 package main
 
 import (
-	"github.com/freignat91/agrid/agridapi"
+	"github.com/freignat91/blockchain/api"
 	"github.com/spf13/cobra"
 )
 
 // PlatformMonitor is the main command for attaching platform subcommands.
 var NodeLsCmd = &cobra.Command{
 	Use:   "ls",
-	Short: "get the agrid nodes list",
-	Long:  `get the agrid nodes list`,
+	Short: "get the blockchain nodes list",
+	Long:  `get the blockchain nodes list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.getNodeList(cmd, args); err != nil {
 			bCLI.Fatal("Error: %v\n", err)
@@ -24,9 +24,9 @@ func init() {
 func (m *bchainCLI) getNodeList(cmd *cobra.Command, args []string) error {
 	m.pInfo("Execute: getNodeList\n")
 
-	api := agridapi.New(m.server)
-	m.setAPILogLevel(api)
-	list, err := api.NodeLs()
+	tapi := api.New(m.server)
+	m.setAPILogLevel(tapi)
+	list, err := tapi.NodeLs()
 	if err != nil {
 		return err
 	}

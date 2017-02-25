@@ -1,11 +1,11 @@
-package abcapi
+package api
 
 import (
 	"fmt"
 )
 
 // NodeWriteStats makes node write node stats in node logs
-func (api *AgridAPI) InfoWriteStats(node string) error {
+func (api *BchainAPI) InfoWriteStats(node string) error {
 	if node == "" {
 		node = "*"
 	}
@@ -20,7 +20,7 @@ func (api *AgridAPI) InfoWriteStats(node string) error {
 }
 
 // InfoGetNodeName get the node name having index "index"
-func (api *AgridAPI) InfoGetNodeName(index int) (string, error) {
+func (api *BchainAPI) InfoGetNodeName(index int) (string, error) {
 	client, err := api.getClient()
 	if err != nil {
 		return "", err
