@@ -29,8 +29,8 @@ message AntMes {
         string errorMes = 15;
         repeated string nodes = 16;
         string user_name = 17;
-        DataKey key = 18;
-        bool no_blocking = 19;
+        bool no_blocking = 18;
+        bytes key = 19;
         bytes data = 20;
 }
 

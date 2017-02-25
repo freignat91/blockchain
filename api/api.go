@@ -1,7 +1,11 @@
 package api
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 )
@@ -18,7 +22,7 @@ type BchainAPI struct {
 	serverIndex int
 	logLevel    int
 	userName    string
-	userToken   string
+	key         *rsa.PrivateKey
 }
 
 // New create an blockchain api instance
@@ -31,7 +35,6 @@ func New(servers string) *BchainAPI {
 		serverList: serverList,
 		logLevel:   LOG_WARN,
 	}
-	api.userName = "common"
 	return api
 }
 
@@ -115,45 +118,47 @@ func (api *BchainAPI) printf(format string, args ...interface{}) {
 	log.Printf(format, args...)
 }
 
-func (api *BchainAPI) formatKey(key string) string {
-	if key != "" {
-		for len(key) < 32 {
-			key = fmt.Sprintf("%s%s", key, key)
-		}
-		key = key[0:32]
-	}
-	return key
-}
-
 // SetUser define the current user
-func (api *BchainAPI) SetUser(user string) {
-	api.userName = "common"
-	api.userToken = ""
-	if user != "" {
-		list := strings.Split(user, ":")
-		if len(list) == 2 {
-			api.userName = list[0]
-			api.userToken = list[1]
-		} else {
-			api.userName = list[0]
-		}
+func (api *BchainAPI) SetUser(user string, keyPath string) error {
+	//fmt.Printf("setUser: %s path:%s\n", user, keyPath)
+	api.userName = user
+	data, err := ioutil.ReadFile(keyPath)
+	if err != nil {
+		return fmt.Errorf("Read private key error: %v\n", err)
 	}
+	block, _ := pem.Decode(data)
+	if block == nil {
+		return fmt.Errorf("Error private key file is not a pem format")
+	}
+	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return fmt.Errorf("Error parsing private key: %v\n", err)
+	}
+	api.key = key
+	return nil
 }
 
 // UserCreate create an user and return a token
-func (api *BchainAPI) UserCreate(name string, token string) (string, error) {
+func (api *BchainAPI) UserSignup(name string) error {
 	if err := api.verifyUserName(name); err != nil {
-		return "", fmt.Errorf("Invalide user name: %v", err)
+		return fmt.Errorf("Invalide user name: %v", err)
 	}
 	client, err := api.getClient()
 	if err != nil {
-		return "", err
+		return err
 	}
-	ret, errs := client.createSendMessage("", true, "createUser", name, token)
+	ret, errs := client.createSendMessage("", true, "createUser", name)
 	if errs != nil {
-		return "", errs
+		return errs
 	}
-	return ret.Args[0], nil
+	data := pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: ret.Key,
+		},
+	)
+	ioutil.WriteFile(fmt.Sprintf("./%s.key", name), data, 0644)
+	return nil
 }
 
 func (api *BchainAPI) verifyUserName(name string) error {
@@ -167,19 +172,37 @@ func (api *BchainAPI) verifyUserName(name string) error {
 }
 
 // UserRemove create an user
-func (api *BchainAPI) UserRemove(name string, force bool) error {
-	api.SetUser(name)
+func (api *BchainAPI) UserRemove(name string) error {
 	defer func() {
 		api.userName = ""
-		api.userToken = ""
+		api.key = nil
 	}()
 	client, err := api.getClient()
 	if err != nil {
 		return err
 	}
-	_, errs := client.createSendMessage("*", true, "removeUser", api.userName, api.userToken, fmt.Sprintf("%t", force))
+	_, errs := client.createSendMessage("*", true, "removeUser")
 	if errs != nil {
 		return errs
+	}
+	return nil
+}
+
+func (api *BchainAPI) AddEntry(entry []byte, args []string) error {
+	client, err := api.getClient()
+	if err != nil {
+		return err
+	}
+	mes, errc := client.createSignedMessage("", true, "addEntry", entry, args...)
+	if errc != nil {
+		return errc
+	}
+	ret, errs := client.sendMessage(mes, true)
+	if errs != nil {
+		return errs
+	}
+	if ret.ErrorMes != "" {
+		return fmt.Errorf(ret.ErrorMes)
 	}
 	return nil
 }

@@ -12,7 +12,7 @@ var NodeWriteStatsCmd = &cobra.Command{
 	Long:  `write stats in log file`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.NodeWriteStats(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -29,7 +29,7 @@ func (m *bchainCLI) NodeWriteStats(cmd *cobra.Command, args []string) error {
 	}
 	m.pInfo("Execute: writeTrage\n")
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	if err := tapi.InfoWriteStats(node); err != nil {
 		return err
 	}

@@ -1,39 +1,21 @@
 package api
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
 )
 
-type gCipher struct {
-	key    []byte
-	nonce  []byte
-	block  cipher.Block
-	buffer []byte
-}
-
-func (g *gCipher) init(key []byte) error {
-
-	block, err := aes.NewCipher(key)
+func (api *BchainAPI) sign(payload []byte) ([]byte, error) {
+	var opts rsa.PSSOptions
+	opts.SaltLength = rsa.PSSSaltLengthAuto //TODO: to be updated
+	newhash := crypto.SHA256
+	pssh := newhash.New()
+	pssh.Write(payload)
+	hashed := pssh.Sum(nil)
+	signature, err := rsa.SignPSS(rand.Reader, api.key, newhash, hashed, &opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	g.block = block
-	g.buffer = make([]byte, aes.BlockSize)
-	//g.stream = cipher.NewCFBEncrypter(g.block, g.buffer)
-	return nil
-}
-
-func (g *gCipher) encrypt(data []byte) ([]byte, error) {
-
-	stream := cipher.NewCFBEncrypter(g.block, g.buffer)
-	stream.XORKeyStream(data, data)
-	return data, nil
-}
-
-func (g *gCipher) decrypt(data []byte) ([]byte, error) {
-
-	stream := cipher.NewCFBDecrypter(g.block, g.buffer)
-	stream.XORKeyStream(data, data)
-	return data, nil
+	return signature, nil
 }

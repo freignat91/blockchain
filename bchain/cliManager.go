@@ -12,6 +12,8 @@ type bchainCLI struct {
 	verbose    bool
 	silence    bool
 	debug      bool
+	userName   string
+	keyPath    string
 }
 
 var currentColorTheme = "default"
@@ -47,7 +49,7 @@ func (m *bchainCLI) printf(col int, format string, args ...interface{}) {
 	colorp.Printf(format, args...)
 }
 
-func (m *bchainCLI) Fatal(format string, args ...interface{}) {
+func (m *bchainCLI) fatal(format string, args ...interface{}) {
 	m.printf(colError, format, args...)
 	os.Exit(1)
 }
@@ -96,7 +98,7 @@ func (m *bchainCLI) setColors() {
 	//add theme as you want.
 }
 
-func (m *bchainCLI) setAPILogLevel(api *api.BchainAPI) {
+func (m *bchainCLI) setAPI(api *api.BchainAPI) error {
 	if m.silence {
 		api.SetLogLevel("error")
 	} else if m.verbose {
@@ -106,4 +108,8 @@ func (m *bchainCLI) setAPILogLevel(api *api.BchainAPI) {
 	} else {
 		api.SetLogLevel("warn")
 	}
+	if err := api.SetUser(m.userName, m.keyPath); err != nil {
+		return err
+	}
+	return nil
 }

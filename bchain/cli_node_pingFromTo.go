@@ -14,7 +14,7 @@ var NodePingFromToCmd = &cobra.Command{
 	Long:  `pingFromTo`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.nodePingFromTo(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -30,7 +30,7 @@ func (m *bchainCLI) nodePingFromTo(cmd *cobra.Command, args []string) error {
 	}
 	t0 := time.Now()
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	path, err := tapi.NodePingFromTo(args[0], args[1], m.debug)
 	if err != nil {
 		return err

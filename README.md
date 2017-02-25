@@ -60,6 +60,100 @@ this command as not effect on the real cluster grid connections, see:
 - ./docs/grid-building.pptx
 - ./docs/ant-net.pptx
 
+# CLI
+
+AntBlockChain command lines is implemented using the AntBlockchain Go API
+
+### common options
+
+- --verbose: display more informations messages
+- --server: format addr1:port,addr2:port, ...   list of the cluster servers (can list less servers than really in the cluster, just one for instance).
+- --user: user name, default in ~/.config/antblockchain/blockchain.yaml config file, key: userName
+- --key: privateKey file path, default in ~/.config/antblockchain/blockchain.yaml config file, key: keyPath
+
+### create a user
+`bchain user signup [username]`
+
+Create a user and return a file containing his private key
+
+The private key file path and user name can be set in the conffile file: ~/.config/antblockchain/blockchain.yaml, to do have to write it for all commands, as for instance:
+
+```
+username: aUserName
+keypath: ~/.config/antblockchain/private.key
+
+```
+
+### remove a user
+`bchain user remove [user]`
+
+Remove a user.
+
+- [user] the user to remove
+
+
+### list the cluster nodes
+
+`bchain node ls`
+
+### ping a cluster node
+
+`bchain node ping |node]`
+- [node] the node name to ping
+
+### add an entry in the blockchain (on going, not yet working)
+
+`bchain add [payload] args...`
+- validate and insert the payload in the blockchain
+
+
+
+# API
+
+AntBlockchain is usable using Go api API github.com/freignat91/blockchain/api
+
+### Usage
+
+```
+        import "github.com/freignat91/blockchain/api"
+        ...
+        bcApi := api.New("localhost:30103")
+        list, err := bcApi.NodeLs()
+        ...
+```
+
+### func (api *BchainAPI) UserSignup(name string) error
+
+Create a new user, return a privateKey to authenticate the user for any blockchain commands
+Argument
+- name: the user name to create
+
+### func (api *BchainAPI) UserRemove(name string) error
+
+Remove a user
+Argument
+- name: the user name to remove, format userName:token
+
+
+### func (api *BchainAPI) SetUser(user string, keyPath string) error
+
+Set the current user and authenticate it with his privateKey
+Arguments:
+- user: the user name
+- keyPath: the path of the file where the user's privateKey is
+
+
+### func (api *AgridAPI) NodePing(node string, debugTrace bool) (string, error)
+
+Ping a node
+Arguments:
+- node: node name to ping
+- debugTrace: if true, trace the message especially in the node logs.
+
+### func (api *AgridAPI) NodeLs() ([]string, error)
+
+List the node of the cluster
+
 
 # tests
 
@@ -73,7 +167,8 @@ execute: make test
 - Each node create a random RSA key paire, keep its private one in memory only and send its public one to all nodes which keep them in memory only also.
 - have a antblockchain CLI called bchain with the following commands available:
     - node ls: to display node status
-
+- add user management: creation, remove with an RSA key pair by user, private key keep by the user, public key saved in the cluster.
+- save a block on the block chain validated at node majority using CLI command (to test majority validation)
 
 ## License
 

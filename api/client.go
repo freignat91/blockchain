@@ -104,17 +104,33 @@ func (g *gnodeClient) startServerReader() error {
 }
 
 func (g *gnodeClient) createMessage(target string, returnAnswer bool, functionName string, args ...string) *gnode.AntMes {
-	return gnode.NewAntMes(target, returnAnswer, functionName, args...)
+	mes := gnode.NewAntMes(target, returnAnswer, functionName, args...)
+	mes.UserName = g.api.userName
+	return mes
+}
+
+func (g *gnodeClient) createSignedMessage(target string, returnAnswer bool, functionName string, payload []byte, args ...string) (*gnode.AntMes, error) {
+	mes := gnode.NewAntMes(target, returnAnswer, functionName, args...)
+	mes.UserName = g.api.userName
+	mes.Data = payload
+	key, err := g.api.sign(payload)
+	if err != nil {
+		return nil, fmt.Errorf("Signature error: %v", err)
+	}
+	mes.Key = key
+	return mes, nil
 }
 
 func (g *gnodeClient) createSendMessageNoAnswer(target string, functionName string, args ...string) error {
 	mes := gnode.NewAntMes(target, false, functionName, args...)
+	mes.UserName = g.api.userName
 	_, err := g.sendMessage(mes, true)
 	return err
 }
 
 func (g *gnodeClient) createSendMessage(target string, waitForAnswer bool, functionName string, args ...string) (*gnode.AntMes, error) {
 	mes := gnode.NewAntMes(target, true, functionName, args...)
+	mes.UserName = g.api.userName
 	return g.sendMessage(mes, waitForAnswer)
 }
 

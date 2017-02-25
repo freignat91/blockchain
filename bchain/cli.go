@@ -1,5 +1,8 @@
 package main
 
+//TODO:
+//remove user code from nodeFunction
+
 import (
 	"fmt"
 	"github.com/spf13/cobra"
@@ -21,6 +24,8 @@ func cli() {
 	RootCmd.PersistentFlags().BoolVarP(&bCLI.verbose, "verbose", "v", false, `Verbose output`)
 	RootCmd.PersistentFlags().BoolVarP(&bCLI.silence, "silence", "s", false, `Silence output`)
 	RootCmd.PersistentFlags().BoolVar(&bCLI.debug, "debug", false, `Silence output`)
+	RootCmd.PersistentFlags().StringVarP(&bCLI.userName, "user", "u", config.userName, `user name, default in config file`)
+	RootCmd.PersistentFlags().StringVarP(&bCLI.keyPath, "key", "k", config.keyPath, `key path, default in config file`)
 	cobra.OnInitialize(func() {
 		if err := bCLI.init(); err != nil {
 			fmt.Printf("Init error: %v\n", err)

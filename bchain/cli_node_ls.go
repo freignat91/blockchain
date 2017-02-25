@@ -12,7 +12,7 @@ var NodeLsCmd = &cobra.Command{
 	Long:  `get the blockchain nodes list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.getNodeList(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -25,7 +25,7 @@ func (m *bchainCLI) getNodeList(cmd *cobra.Command, args []string) error {
 	m.pInfo("Execute: getNodeList\n")
 
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	list, err := tapi.NodeLs()
 	if err != nil {
 		return err

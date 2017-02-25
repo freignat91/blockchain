@@ -12,7 +12,7 @@ var NodeClearCmd = &cobra.Command{
 	Long:  `clear an blockchain node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.clear(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -28,7 +28,7 @@ func (m *bchainCLI) clear(cmd *cobra.Command, args []string) error {
 	}
 	m.pInfo("Execute: clear node %s\n", node)
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	if err := tapi.NodeClear(node); err != nil {
 		return err
 	}

@@ -39,10 +39,6 @@ func (g *gnodeLeader) init(gnode *GNode) (bool, error) {
 	if err := g.getSelfAddr(); err != nil {
 		return false, err
 	}
-	if err := g.gnode.initKey(); err != nil {
-		return false, err
-	}
-	g.gnode.testKey()
 	g.computeGrid()
 	return g.leader, g.waitReady()
 
@@ -201,7 +197,20 @@ func (g *gnodeLeader) connectNodes() {
 	g.startupInit = false
 	time.AfterFunc(time.Second*20, func() {
 		g.gnode.displayConnection()
-		g.gnode.sendPublicKey()
+		g.sendPublicKey()
+	})
+}
+
+func (g *gnodeLeader) sendPublicKey() {
+	key, err := g.gnode.key.getPublicKey()
+	if err != nil {
+		logf.error("sendPublicKey get error: %v\n", err)
+		return
+	}
+	g.gnode.senderManager.sendMessage(&AntMes{
+		Target:   "*",
+		Function: "setNodePublicKey",
+		Key:      key,
 	})
 }
 

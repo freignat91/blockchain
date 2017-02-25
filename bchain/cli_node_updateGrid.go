@@ -12,7 +12,7 @@ var NodeUpdateGridCmd = &cobra.Command{
 	Long:  `update grid connections`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.nodeUpdateGrid(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -38,7 +38,7 @@ func (m *bchainCLI) nodeUpdateGrid(cmd *cobra.Command, args []string) error {
 	}
 	m.pInfo("Execute: update grid\n")
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	if err := tapi.NodeUpdateGrid(node, force); err != nil {
 		return err
 	}

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"io/ioutil"
-	"math/rand"
 	"net"
 	"os"
 	"path"
@@ -26,7 +24,7 @@ type GNode struct {
 	conn              *grpc.ClientConn
 	nbNode            int
 	connectReady      bool
-	key               *gnodeKey
+	key               *GNodeKey
 	targetMap         map[string]*gnodeTarget
 	clientMap         secureMap //map[string]*gnodeClient
 	receiverManager   ReceiverManager
@@ -45,7 +43,6 @@ type GNode struct {
 	lockId            sync.RWMutex
 	dataPath          string
 	nodeFunctions     *nodeFunctions
-	userMap           map[string]string
 	availableNodeList []string
 	eventListenerMap  map[string]*gnodeListener
 }
@@ -93,6 +90,12 @@ func (g *GNode) Start(version string, build string) error {
 func (g *GNode) init() {
 	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0666)
 	os.MkdirAll(path.Join(config.rootDataPath, "tmp"), 0666)
+	key, err := g.newKey()
+	if err != nil {
+		fmt.Printf("Error compute node keys: %v\n", err)
+		os.Exit(1)
+	}
+	g.key = key
 	g.lockId = sync.RWMutex{}
 	g.traceMap = make(map[string]*gnodeTrace)
 	//g.clientMap = make(map[string]*gnodeClient)
@@ -296,101 +299,4 @@ func (g *GNode) startReorganizer() {
 			}
 		}
 	}()
-}
-
-func (g *GNode) getToken() string {
-	rand.Seed(time.Now().UnixNano())
-	b := make([]byte, 32)
-	rand.Read(b)
-	return fmt.Sprintf("%x", b)
-}
-
-func (g *GNode) createUser(userName string, token string) error {
-	logf.info("Create user %s\n", userName)
-	_, err := ioutil.ReadDir(path.Join(config.rootDataPath, "users", userName))
-	if err == nil {
-		g.loadOneUser(userName)
-		return fmt.Errorf("User %s : already exist", userName)
-	}
-	os.MkdirAll(path.Join(config.rootDataPath, "users", userName), os.ModeDir)
-	file, errc := os.Create(path.Join(config.rootDataPath, "users", userName, "token"))
-	if errc != nil {
-		return errc
-	}
-	if _, err := file.WriteString(token); err != nil {
-		return err
-	}
-	file.Close()
-	logf.info("Save user: %s:[%s]\n", userName, token)
-	g.userMap[userName] = token
-	return nil
-}
-
-func (g *GNode) removeUser(userName string, token string, force bool) error {
-	if !g.checkUser(userName, token) {
-		return fmt.Errorf("Invalid user/token")
-	}
-	logf.warn("Remove user %s force mode=%t\n", userName, force)
-	dir := path.Join(config.rootDataPath, "users")
-	fileList, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-	exist := false
-	for _, fd := range fileList {
-		if fd.Name() != "token" && fd.Name() != "meta" {
-			exist = true
-			break
-		}
-	}
-	if exist && !force {
-		return fmt.Errorf("Impossible to remove user %s files still exist (use --force", userName)
-	}
-	if err := os.RemoveAll(path.Join(config.rootDataPath, userName)); err != nil {
-		return err
-	}
-	delete(g.userMap, userName)
-	return nil
-}
-
-func (g *GNode) loadUser() error {
-	g.userMap = make(map[string]string)
-	fileList, err := ioutil.ReadDir(path.Join(config.rootDataPath, "users"))
-	if err != nil {
-		return err
-	}
-	for _, fd := range fileList {
-		g.loadOneUser(fd.Name())
-	}
-	return nil
-}
-
-func (g *GNode) loadOneUser(name string) {
-	data, err := ioutil.ReadFile(path.Join(config.rootDataPath, "users", name, "token"))
-	if err != nil {
-		logf.error("loadOneUser user=%s: %v\n", name, err)
-		return
-	}
-	token := string(data)
-	logf.info("Add user %s [%s]\n", name, token)
-	g.userMap[name] = token
-}
-
-func (g *GNode) checkUser(user string, token string) bool {
-	if user == "" {
-		return false
-	}
-	if user == "common" {
-		return true
-	}
-	check, ok := g.userMap[user]
-	if !ok {
-		logf.info("Check user %s: false\n", user)
-		return false
-	}
-	if token == check {
-		return true
-	}
-	logf.info("Check user %s false\n", user)
-	return false
 }

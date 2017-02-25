@@ -13,7 +13,7 @@ var NodeSetLogLevelCmd = &cobra.Command{
 	Long:  `setLogLevel ERROR/WARN/INFO/DEBUG`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.setLogLevel(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -30,7 +30,7 @@ func (m *bchainCLI) setLogLevel(cmd *cobra.Command, args []string) error {
 	m.pInfo("Execute: setLogLevel %s\n", args[0])
 	node := cmd.Flag("node").Value.String()
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	if err := tapi.NodeSetLogLevel(node, args[0]); err != nil {
 		return err
 	}

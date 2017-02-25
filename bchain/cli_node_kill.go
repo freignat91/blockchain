@@ -13,7 +13,7 @@ var NodeKillCmd = &cobra.Command{
 	Long:  `kill an blockchain node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.kill(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -29,7 +29,7 @@ func (m *bchainCLI) kill(cmd *cobra.Command, args []string) error {
 	node := args[0]
 	m.pInfo("Execute: kill node %s\n", node)
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	if err := tapi.NodeKill(node); err != nil {
 		return err
 	}

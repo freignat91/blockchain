@@ -37,9 +37,10 @@ func (m *ReceiverManager) loadFunctions() {
 	m.functionMap["createNodeUser"] = m.gnode.nodeFunctions.createNodeUser
 	m.functionMap["removeUser"] = m.gnode.nodeFunctions.removeUser
 	m.functionMap["removeNodeUser"] = m.gnode.nodeFunctions.removeNodeUser
+	m.functionMap["setNodePublicKey"] = m.gnode.nodeFunctions.setNodePublicKey
 	//gnode Function
 	m.functionMap["sendBackEvent"] = m.gnode.sendBackEvent
-	m.functionMap["setPublicKey"] = m.gnode.setPublicKey
+	m.functionMap["addEntry"] = m.gnode.addEntry
 }
 
 func (m *ReceiverManager) start(gnode *GNode, bufferSize int, maxGoRoutine int) {

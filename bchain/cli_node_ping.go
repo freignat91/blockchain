@@ -14,7 +14,7 @@ var NodePingCmd = &cobra.Command{
 	Long:  `ping an blockchain node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := bCLI.ping(cmd, args); err != nil {
-			bCLI.Fatal("Error: %v\n", err)
+			bCLI.fatal("Error: %v\n", err)
 		}
 	},
 }
@@ -31,7 +31,7 @@ func (m *bchainCLI) ping(cmd *cobra.Command, args []string) error {
 	m.pInfo("Execute: ping %s\n", node)
 	t0 := time.Now()
 	tapi := api.New(m.server)
-	m.setAPILogLevel(tapi)
+	m.setAPI(tapi)
 	path, err := tapi.NodePing(node, false)
 	if err != nil {
 		return err
