@@ -9,6 +9,48 @@ service GNodeService {
         rpc AskConnection (AskConnectionRequest) returns (PingRet) {}
         rpc Ping (AntMes) returns (PingRet) {}
         rpc Healthcheck(HealthRequest) returns (AntRet) {}
+        rpc CheckEntry(CheckEntryRequest) returns (EmptyRet) {}
+}
+
+message BCEntry {
+        bytes date = 1;
+        repeated TreeLabel labels = 2;
+        bytes payload = 3;
+        string user_name = 4;
+        bytes user_signature = 5; 
+        bytes hash = 6;
+}
+
+message TreeBlock {
+        string id = 1;
+        string parent_id = 2;
+        string child_id = 3;
+        string sub_branch_label_name = 4;
+        string label_name = 5;
+        string label_value = 6;
+        map<string, string> branch_map = 7;
+        bytes hash = 8;
+        bytes full_hash = 9;
+        repeated BCEntry entries = 10;
+        bool loaded = 11;
+        bool updated = 12;
+        int64 size = 13;
+        int64 depth = 14;
+}
+
+message TreeLabel {
+        string name = 1;
+        string value = 2;
+}
+
+message CheckEntryRequest {
+        string id = 1;
+        string origin_node = 2;
+        map<string, bytes> node_sign_map = 3;
+        bytes entry = 4;
+        bytes entry_hash = 5;
+        bytes root_hash = 6;
+        bool is_branch = 8;
 }
 
 message AntMes {
@@ -32,6 +74,7 @@ message AntMes {
         bool no_blocking = 18;
         bytes key = 19;
         bytes data = 20;
+        TreeBlock block = 21;
 }
 
 message AntRet{

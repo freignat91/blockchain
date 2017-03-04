@@ -33,7 +33,7 @@ func main() {
 
 func healthcheck() bool {
 	log.Println("main healthcheck")
-	response, err := http.Get("http://127.0.0.1:3000/api/v1/health")
+	response, err := http.Get("http://127.0.0.1:3000/api/v1/ready")
 	if err != nil {
 		return false
 	}

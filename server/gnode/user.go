@@ -15,7 +15,7 @@ func (n *nodeFunctions) createUser(mes *AntMes) error {
 	}
 	userName := mes.Args[0]
 	logf.info("Received create user %s\n", userName)
-	key, err := n.gnode.newKey()
+	key, err := n.gnode.newKey(false)
 	if err != nil {
 		return err
 	}

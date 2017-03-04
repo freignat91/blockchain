@@ -47,8 +47,11 @@ func (g *GNode) Healthcheck(ctx context.Context, req *HealthRequest) (*AntRet, e
 }
 
 func (g *GNode) GetClientStream(stream GNodeService_GetClientStreamServer) error {
-	if !g.healthy {
+	if !g.ready {
 		return fmt.Errorf("Node %s not yet ready", g.name)
+	}
+	if !g.healthy {
+		return fmt.Errorf("Node %s not healty anymore", g.name)
 	}
 	g.receiverManager.startClientReader(stream)
 	return nil
@@ -81,4 +84,8 @@ func (g *GNode) AskConnection(ctx context.Context, req *AskConnectionRequest) (*
 	}
 	g.targetMap[req.Name] = target
 	return ret, nil
+}
+
+func (g *GNode) CheckEntry(ctx context.Context, req *CheckEntryRequest) (*EmptyRet, error) {
+	return &EmptyRet{}, g.entryManager.checkEntry(req)
 }

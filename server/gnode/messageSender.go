@@ -58,7 +58,8 @@ func (s *MessageSender) sendMessage(mes *AntMes) error {
 		s.sendToTarget(target, mes)
 		return nil
 	}
-	if trace, ok := s.gnode.traceMap[mes.Target]; ok {
+	if s.gnode.traceMap.exists(mes.Target) {
+		trace := s.gnode.traceMap.get(mes.Target).(*gnodeTrace)
 		trace.nbUsed++
 		logf.debugMes(mes, "Use trace on target %s : %d\n", trace.target.name, trace.nbUsed)
 		//logf.info("Use trace on target %s : %d\n", trace.target.name, trace.nbUsed)
@@ -135,20 +136,21 @@ func (s *MessageSender) updateTrace(mes *AntMes) {
 		logf.warn("Local target %s doesn't exist locally %s\n", mes.Path[1])
 		return
 	}
-	if trace, ok := s.gnode.traceMap[target]; ok {
+	if s.gnode.traceMap.exists(target) {
+		trace := s.gnode.traceMap.get(target).(*gnodeTrace)
 		logf.debugMes(mes, "Confirm trace for target %s using local target %s : %d\n", target, localTarget.name, trace.persistence)
 		trace.persistence--
 		if trace.persistence <= 0 {
-			delete(s.gnode.traceMap, target)
+			s.gnode.traceMap.del(target)
 		}
 		return
 	}
 	logf.debugMes(mes, "create trace for target %s using local target %s\n", target, localTarget.name)
-	s.gnode.traceMap[target] = &gnodeTrace{
+	s.gnode.traceMap.set(target, &gnodeTrace{
 		creationTime: time.Now(),
 		persistence:  config.tracePersistence,
 		target:       localTarget,
-	}
+	})
 }
 
 func (t *gnodeTarget) sendMessage(mes *AntMes) error {

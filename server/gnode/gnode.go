@@ -24,6 +24,8 @@ type GNode struct {
 	conn              *grpc.ClientConn
 	nbNode            int
 	connectReady      bool
+	entryManager      EntryManager
+	treeManager       TreeManager
 	key               *GNodeKey
 	targetMap         map[string]*gnodeTarget
 	clientMap         secureMap //map[string]*gnodeClient
@@ -33,7 +35,9 @@ type GNode struct {
 	mesNumber         int
 	lastIndexTime     time.Time
 	healthy           bool
-	traceMap          map[string]*gnodeTrace
+	ready             bool
+	grpcReady         bool
+	traceMap          secureMap //map[string]*gnodeTrace
 	nbRouted          int64
 	idMap             gnodeIdMap
 	nodeNameList      []string
@@ -74,8 +78,10 @@ type gnodeTrace struct {
 
 // Start gnode
 func (g *GNode) Start(version string, build string) error {
+	g.host = os.Getenv("HOSTNAME")
 	config.init(version, build)
 	g.init()
+	g.grpcReady = true
 	g.startupManager = &gnodeLeader{}
 	if _, err := g.startupManager.init(g); err != nil {
 		return err
@@ -88,33 +94,38 @@ func (g *GNode) Start(version string, build string) error {
 }
 
 func (g *GNode) init() {
-	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0666)
-	os.MkdirAll(path.Join(config.rootDataPath, "tmp"), 0666)
-	key, err := g.newKey()
+	key, err := g.newKey(true)
 	if err != nil {
 		fmt.Printf("Error compute node keys: %v\n", err)
 		os.Exit(1)
 	}
 	g.key = key
 	g.lockId = sync.RWMutex{}
-	g.traceMap = make(map[string]*gnodeTrace)
+	g.traceMap.init()
 	//g.clientMap = make(map[string]*gnodeClient)
 	g.clientMap.init()
 	g.targetMap = make(map[string]*gnodeTarget)
 	g.initEventListener()
 	g.nbNode = config.nbNode
-	g.dataPath = config.rootDataPath
-	g.loadUser()
 	g.idMap.Init()
 	g.nodeFunctions = &nodeFunctions{gnode: g}
 	g.startRESTAPI()
 	g.startGRPCServer()
 	g.receiverManager.start(g, config.bufferSize, config.parallelReceiver)
 	g.senderManager.start(g, config.bufferSize, config.parallelSender)
-	g.host = os.Getenv("HOSTNAME")
 	time.Sleep(3 * time.Second)
 }
 
+func (g *GNode) initFromFileSystem() {
+	os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0600)
+	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0600)
+	g.loadUser()
+	g.entryManager.init(g)
+	if err := g.treeManager.init(g); err != nil {
+		logf.error("treeManager init error: %v\n", err)
+		os.Exit(1)
+	}
+}
 func (g *GNode) startGRPCServer() {
 	s := grpc.NewServer()
 	RegisterGNodeServiceServer(s, g)

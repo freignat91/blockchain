@@ -108,19 +108,19 @@ func (r *MessageReceiver) updateTrace(mes *AntMes) {
 		logf.warn("Local target %s doesn't exist locally %s\n", mes.Path[1])
 		return
 	}
-	if trace, ok := r.gnode.traceMap[target]; ok {
+	if r.gnode.traceMap.exists(target) {
+		trace := r.gnode.traceMap.get(target).(*gnodeTrace)
 		logf.debugMes(mes, "Confirm trace for target %s using local target %s : %d\n", target, localTarget.name, trace.persistence)
 		trace.persistence--
 		if trace.persistence <= 0 {
-			delete(r.gnode.traceMap, target)
+			r.gnode.traceMap.del(target)
 		}
 		return
 	}
 	logf.debugMes(mes, "create trace for target %s using local target %s\n", target, localTarget.name)
-	r.gnode.traceMap[target] = &gnodeTrace{
+	r.gnode.traceMap.set(target, &gnodeTrace{
 		creationTime: time.Now(),
 		persistence:  config.tracePersistence,
 		target:       localTarget,
-	}
-
+	})
 }

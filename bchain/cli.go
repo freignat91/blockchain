@@ -39,7 +39,7 @@ func cli() {
 		Short: "Display the version number of antblockchain",
 		Long:  `Display the version number of antblockchain`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("antblockchain version: %s, build: %s)\n", Version, Build)
+			fmt.Printf("antblockchain version: %s\n", Version)
 		},
 	}
 	RootCmd.AddCommand(versionCmd)
@@ -50,7 +50,7 @@ func cli() {
 		Short: "Display antblockchain version and server information",
 		Long:  `Display antblockchain version and server information.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("antblockchain version: %s, build: %s)\n", Version, Build)
+			fmt.Printf("antblockchain version: %s\n", Version)
 			fmt.Printf("Server: %s\n", config.serverAddress)
 		},
 	}

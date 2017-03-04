@@ -12,6 +12,16 @@ type nodeFunctions struct {
 	gnode *GNode
 }
 
+func (n *nodeFunctions) isReady(mes *AntMes) error {
+	answer := n.gnode.createAnswer(mes, false)
+	answer.Args = []string{n.gnode.name, "false"}
+	if n.gnode.ready {
+		answer.Args[1] = "true"
+	}
+	n.gnode.senderManager.sendMessage(answer)
+	return nil
+}
+
 func (n *nodeFunctions) ping(mes *AntMes) error {
 	logf.debug("execute ping from: %s\n", mes.Origin)
 	answer := n.gnode.createAnswer(mes, false)
@@ -87,6 +97,19 @@ func (n *nodeFunctions) getConnections(mes *AntMes) error {
 	for name, _ := range n.gnode.targetMap {
 		ret += (" " + name)
 	}
+	answer := n.gnode.createAnswer(mes, true)
+	answer.Args = []string{ret}
+	n.gnode.senderManager.sendMessage(answer)
+	return nil
+}
+
+func (n *nodeFunctions) getNodeInfo(mes *AntMes) error {
+	root := n.gnode.treeManager.root
+	if root == nil {
+		return fmt.Errorf("Blockchain tree not ready on node %s", n.gnode.name)
+	}
+	nbUser := len(n.gnode.key.userKeyMap)
+	ret := fmt.Sprintf("%s (%s): users: %d nbEntry: %d  hash: %x", n.gnode.name, n.gnode.host, nbUser, root.Size, root.FullHash)
 	answer := n.gnode.createAnswer(mes, true)
 	answer.Args = []string{ret}
 	n.gnode.senderManager.sendMessage(answer)

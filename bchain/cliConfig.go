@@ -18,10 +18,10 @@ type CliConfig struct {
 }
 
 //update conf instance with default value and environment variables
-func (cfg *CliConfig) init(version string, build string) {
+func (cfg *CliConfig) init(version string) {
 	cfg.setDefault()
 	cfg.loadConfig()
-	//cfg.displayConfig(version, build)
+	//cfg.displayConfig(version)
 }
 
 //Set default value of configuration
@@ -38,8 +38,8 @@ func (cfg *CliConfig) setDefault() {
 }
 
 //display amp-pilot configuration
-func (cfg *CliConfig) displayConfig(version string, build string) {
-	fmt.Printf("antblockchain version: %v build: %s\n", version, build)
+func (cfg *CliConfig) displayConfig(version string) {
+	fmt.Printf("antblockchain version: %v\n", version)
 	fmt.Println("----------------------------------------------------------------------------")
 	fmt.Println("Configuration:")
 	fmt.Printf("antblockchain address: %s\n", cfg.serverAddress)

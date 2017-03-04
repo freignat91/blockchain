@@ -4,10 +4,9 @@ SHELL := /bin/sh
 BASEDIR := $(shell echo $${PWD})
 
 # build variables (provided to binaries by linker LDFLAGS below)
-VERSION := 0.1.4
-BUILD := $(shell git rev-parse HEAD | cut -c1-8)
+VERSION := 0.0.1
 
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
+LDFLAGS=-ldflags "-X=main.Version=$(VERSION)"
 
 # ignore vendor directory for go files
 SRC := $(shell find . -type f -name '*.go' -not -path './vendor/*' -not -path './.git/*')
@@ -22,7 +21,7 @@ GENERATED := $(shell find . -type f -name '*.pb.go' -not -path './vendor/*' -not
 CHECKSRC := $(shell find . -type f -name '*.go' -not -name '*.pb.go' -not -path './vendor/*' -not -path './.git/*')
 
 OWNER := freignat91
-NAME :=  antblockchain
+NAME :=  blockchain
 TAG := latest
 
 IMAGE := $(OWNER)/$(NAME):$(TAG)
@@ -36,7 +35,7 @@ TESTS := tests
 all: version check install
 
 version: 
-	@echo "version: $(VERSION) (build: $(BUILD))"
+	@echo "version: $(VERSION)"
 
 clean: 
 	@rm -rf $(GENERATED)
@@ -83,20 +82,22 @@ update-deps:
 start:
 	@docker node inspect self > /dev/null 2>&1 || docker swarm inspect > /dev/null 2>&1 || (echo "> Initializing swarm" && docker swarm init --advertise-addr 127.0.0.1)
 	@docker network ls | grep aNetwork || (echo "> Creating overlay network 'aNetwork'" && docker network create -d overlay aNetwork)
+	@mkdir -p /tmp/blockchain/data
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
-	--mount type=bind,source=/home/freignat/data,target=/data \
-	--replicas=3 \
+	--mount type=bind,source=/tmp/blockchain/data,target=/data \
+	--replicas=30 \
 	$(IMAGE)
 
 
 starttest:
 	@docker node inspect self > /dev/null 2>&1 || docker swarm inspect > /dev/null 2>&1 || (echo "> Initializing swarm" && docker swarm init --advertise-addr 127.0.0.1)
 	@docker network ls | grep aNetwork || (echo "> Creating overlay network 'aNetwork'" && docker network create -d overlay aNetwork)
+	@mkdir -p /tmp/blockchain/data
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
-	--mount type=bind,source=/home/freignat/data,target=/data \
-	--replicas=3 \
+	--mount type=bind,source=/tmp/blockchain/data,target=/data \
+	--replicas=30 \
 	$(IMAGETEST)
 
 stop:

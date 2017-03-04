@@ -87,7 +87,38 @@ func (api *BchainAPI) NodeSetLogLevel(node string, logLevel string) error {
 	return nil
 }
 
-func (api *BchainAPI) NodeLs() ([]string, error) {
+func (api *BchainAPI) NodeInfo() ([]string, error) {
+	rep := []string{}
+	client, err := api.getClient()
+	if err != nil {
+		return rep, err
+	}
+	_, errp := client.createSendMessage("*", false, "getNodeInfo")
+	if errp != nil {
+		return rep, errp
+	}
+	nbOk := 0
+	nodeMap := make(map[string]byte)
+	for {
+		mes, err := client.getNextAnswer(1000)
+		if err != nil {
+			return rep, err
+		}
+		api.info("receive answer: %v (%d/%d)\n", mes.Args, nbOk, len(nodeMap))
+		rep = append(rep, mes.Args[0])
+		for _, nodeName := range mes.Nodes {
+			nodeMap[nodeName] = 1
+		}
+		nbOk++
+		if len(nodeMap) > 0 && nbOk >= len(nodeMap) {
+			break
+		}
+	}
+	sort.Strings(rep)
+	return rep, nil
+}
+
+func (api *BchainAPI) NodeConnections() ([]string, error) {
 	rep := []string{}
 	client, err := api.getClient()
 	if err != nil {

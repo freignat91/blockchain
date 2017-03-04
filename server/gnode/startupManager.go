@@ -44,10 +44,6 @@ func (g *gnodeLeader) init(gnode *GNode) (bool, error) {
 
 }
 
-func testKey() {
-
-}
-
 func (g *gnodeLeader) getSelfAddr() error {
 	err := g.getCommonAddr()
 	if err != nil {
@@ -125,6 +121,8 @@ func (g *gnodeLeader) waitReady() error {
 	}
 	g.gnode.updateLocalNodeList()
 	g.gnode.startReorganizer()
+	g.gnode.initFromFileSystem()
+	g.gnode.ready = true
 	return nil
 }
 
@@ -164,8 +162,8 @@ func (g *gnodeLeader) setIpList() {
 		name := g.buildNodeName(ip)
 		if name == g.gnode.name {
 			g.gnode.nodeIndex = i
-			g.gnode.dataPath = config.rootDataPath //fmt.Sprintf("%s/node%d", config.rootDataPath, i)
-			logf.info("Set dataPath: %s\n", g.gnode.dataPath)
+			config.rootDataPath = fmt.Sprintf("%s/%s", config.dataPath, name)
+			logf.info("Set dataPath: %s\n", config.rootDataPath)
 		}
 		g.gnode.nodeNameList = append(g.gnode.nodeNameList, name)
 	}

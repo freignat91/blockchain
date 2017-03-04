@@ -33,14 +33,19 @@ func (m *ReceiverManager) loadFunctions() {
 	m.functionMap["clear"] = m.gnode.nodeFunctions.clear
 	m.functionMap["forceGC"] = m.gnode.nodeFunctions.forceGCMes
 	m.functionMap["getConnections"] = m.gnode.nodeFunctions.getConnections
+	m.functionMap["getNodeInfo"] = m.gnode.nodeFunctions.getNodeInfo
 	m.functionMap["createUser"] = m.gnode.nodeFunctions.createUser
 	m.functionMap["createNodeUser"] = m.gnode.nodeFunctions.createNodeUser
 	m.functionMap["removeUser"] = m.gnode.nodeFunctions.removeUser
 	m.functionMap["removeNodeUser"] = m.gnode.nodeFunctions.removeNodeUser
 	m.functionMap["setNodePublicKey"] = m.gnode.nodeFunctions.setNodePublicKey
+	m.functionMap["isReady"] = m.gnode.nodeFunctions.isReady
 	//gnode Function
 	m.functionMap["sendBackEvent"] = m.gnode.sendBackEvent
-	m.functionMap["addEntry"] = m.gnode.addEntry
+	//EntryManager function
+	m.functionMap["addEntry"] = m.gnode.entryManager.addEntry
+	m.functionMap["addBranch"] = m.gnode.entryManager.addBranch
+	m.functionMap["getTree"] = m.gnode.treeManager.getTree
 }
 
 func (m *ReceiverManager) start(gnode *GNode, bufferSize int, maxGoRoutine int) {

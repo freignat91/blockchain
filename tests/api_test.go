@@ -10,10 +10,14 @@ const (
 	server = "127.0.0.1:30103"
 )
 
-var bcApi *api.BchainAPI
+var bcapi *api.BchainAPI
 
 func TestMain(m *testing.M) {
-	bcApi = api.New(server)
-	bcApi.SetLogLevel("info")
+	bcapi = api.New(server)
+	bcapi.SetLogLevel("info")
 	os.Exit(m.Run())
+}
+
+func TestReady(t *testing.T) {
+	bcapi.GetNbReady(3)
 }

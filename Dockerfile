@@ -14,7 +14,7 @@ COPY ./ /go/src/github.com/freignat91/blockchain
 
 RUN cd $GOPATH/src/github.com/freignat91/blockchain && \
     rm -f glide.lock && \
-    glide install && \
+    glide update && \
     make install && \
     echo antblockchain built && \
     chmod +x $GOPATH/bin/* && \

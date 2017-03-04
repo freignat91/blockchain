@@ -12,6 +12,7 @@ import (
 )
 
 type GNodeKey struct {
+	gnode      *GNode
 	privateKey *rsa.PrivateKey
 	publicKey  *rsa.PublicKey
 	label      []byte
@@ -20,19 +21,24 @@ type GNodeKey struct {
 	userKeyMap map[string]*rsa.PublicKey
 }
 
-func (g *GNode) newKey() (*GNodeKey, error) {
-	key, err := rsa.GenerateKey(rand.Reader, 4096)
+func (g *GNode) newKey(init bool) (*GNodeKey, error) {
+	keyp, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return nil, err
 	}
-	return &GNodeKey{
-		privateKey: key,
-		publicKey:  &key.PublicKey,
+	key := &GNodeKey{
+		gnode:      g,
+		privateKey: keyp,
+		publicKey:  &keyp.PublicKey,
 		label:      []byte(""),
 		shaHash:    sha256.New(),
-		nodeKeyMap: make(map[string]*rsa.PublicKey),
-		userKeyMap: make(map[string]*rsa.PublicKey),
-	}, nil
+	}
+	if !init {
+		return key, nil
+	}
+	key.nodeKeyMap = make(map[string]*rsa.PublicKey)
+	key.userKeyMap = make(map[string]*rsa.PublicKey)
+	return key, nil
 }
 
 func (k *GNodeKey) sign(block []byte) ([]byte, error) {
@@ -86,7 +92,11 @@ func (k *GNodeKey) addUserKey(userName string, dataKey []byte) error {
 func (k *GNodeKey) verifyNodeSignature(nodeName string, signature []byte, block []byte) error {
 	publicKey, ok := k.nodeKeyMap[nodeName]
 	if !ok {
-		return fmt.Errorf("unknown node %s", nodeName)
+		if nodeName == k.gnode.name {
+			publicKey = k.publicKey
+		} else {
+			return fmt.Errorf("unknown node %s", nodeName)
+		}
 	}
 	return k.verifySignature(publicKey, signature, block)
 }

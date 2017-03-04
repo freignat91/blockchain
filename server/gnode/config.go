@@ -8,19 +8,21 @@ import (
 
 //AgentConfig configuration parameters
 type GNodeConfig struct {
-	nbNode           int
-	nbLineConnect    int
-	nbCrossConnect   int
-	nbDuplicate      int
-	nbDuplicateAck   int
-	restPort         string
-	grpcPort         string
-	udpPort          string
-	bufferSize       int
-	parallelSender   int
-	parallelReceiver int
-	rootDataPath     string
-	tracePersistence int
+	nbNode                 int
+	nbLineConnect          int
+	nbCrossConnect         int
+	nbDuplicate            int
+	nbDuplicateAck         int
+	restPort               string
+	grpcPort               string
+	udpPort                string
+	bufferSize             int
+	parallelSender         int
+	parallelReceiver       int
+	dataPath               string
+	rootDataPath           string
+	tracePersistence       int
+	maxEntryNumberPerBlock int
 }
 
 //update conf instance with default value and environment variables
@@ -42,8 +44,10 @@ func (cfg *GNodeConfig) setDefault() {
 	cfg.parallelSender = 100
 	cfg.nbDuplicate = 3
 	cfg.nbDuplicateAck = 1
-	cfg.rootDataPath = "/data"
+	cfg.dataPath = "/data"
+	cfg.rootDataPath = cfg.dataPath
 	cfg.tracePersistence = 200
+	cfg.maxEntryNumberPerBlock = 3
 }
 
 //Update config with env variables
@@ -58,7 +62,8 @@ func (cfg *GNodeConfig) loadConfigUsingEnvVariable() {
 	cfg.parallelReceiver = cfg.getIntParameter("PARALLEL_RECEIVER", cfg.parallelReceiver)
 	cfg.nbDuplicate = cfg.getIntParameter("NB_DUPLICATE", cfg.nbDuplicate)
 	cfg.nbDuplicateAck = cfg.getIntParameter("NB_DUPLICATE_ACK", cfg.nbDuplicateAck)
-	cfg.rootDataPath = cfg.getStringParameter("DATA_PATH", cfg.rootDataPath)
+	cfg.dataPath = cfg.getStringParameter("DATA_PATH", cfg.dataPath)
+	cfg.maxEntryNumberPerBlock = cfg.getIntParameter("MAX_ENTRIES_NB_PER_BLOCK", cfg.maxEntryNumberPerBlock)
 }
 
 //display amp-pilot configuration

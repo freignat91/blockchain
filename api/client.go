@@ -113,12 +113,33 @@ func (g *gnodeClient) createSignedMessage(target string, returnAnswer bool, func
 	mes := gnode.NewAntMes(target, returnAnswer, functionName, args...)
 	mes.UserName = g.api.userName
 	mes.Data = payload
-	key, err := g.api.sign(payload)
+	dataToSign := g.getDataToSign(payload, args)
+	key, err := g.api.sign(dataToSign)
 	if err != nil {
 		return nil, fmt.Errorf("Signature error: %v", err)
 	}
 	mes.Key = key
 	return mes, nil
+}
+
+func (g *gnodeClient) getDataToSign(payload []byte, args []string) []byte {
+	size := len(payload)
+	for _, arg := range args {
+		size += len(arg)
+	}
+	dataToSign := make([]byte, size, size)
+	nn := g.appendData(dataToSign, 0, payload)
+	for _, arg := range args {
+		nn = g.appendData(dataToSign, nn, []byte(arg))
+	}
+	return dataToSign
+}
+
+func (g *gnodeClient) appendData(buffer []byte, nn int, item []byte) int {
+	for i := 0; i < len(item); i++ {
+		buffer[nn+i] = item[i]
+	}
+	return nn + len(item)
 }
 
 func (g *gnodeClient) createSendMessageNoAnswer(target string, functionName string, args ...string) error {

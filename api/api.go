@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"reflect"
 	"strings"
 )
 
@@ -139,7 +140,7 @@ func (api *BchainAPI) SetUser(user string, keyPath string) error {
 }
 
 // UserCreate create an user and return a token
-func (api *BchainAPI) UserSignup(name string) error {
+func (api *BchainAPI) UserSignup(name string, keyPath string) error {
 	if err := api.verifyUserName(name); err != nil {
 		return fmt.Errorf("Invalide user name: %v", err)
 	}
@@ -157,7 +158,7 @@ func (api *BchainAPI) UserSignup(name string) error {
 			Bytes: ret.Key,
 		},
 	)
-	ioutil.WriteFile(fmt.Sprintf("./%s.key", name), data, 0644)
+	ioutil.WriteFile(keyPath, data, 0600)
 	return nil
 }
 
@@ -188,12 +189,12 @@ func (api *BchainAPI) UserRemove(name string) error {
 	return nil
 }
 
-func (api *BchainAPI) AddEntry(entry []byte, args []string) error {
+func (api *BchainAPI) AddEntry(entry []byte, labels []string) error {
 	client, err := api.getClient()
 	if err != nil {
 		return err
 	}
-	mes, errc := client.createSignedMessage("", true, "addEntry", entry, args...)
+	mes, errc := client.createSignedMessage("", true, "addEntry", entry, labels...)
 	if errc != nil {
 		return errc
 	}
@@ -203,6 +204,60 @@ func (api *BchainAPI) AddEntry(entry []byte, args []string) error {
 	}
 	if ret.ErrorMes != "" {
 		return fmt.Errorf(ret.ErrorMes)
+	}
+	return nil
+}
+
+func (api *BchainAPI) AddBranch(labels []string) error {
+	if len(labels) == 0 {
+		return fmt.Errorf("A banch need at least one label")
+	}
+	client, err := api.getClient()
+	if err != nil {
+		return err
+	}
+	payload := []byte(fmt.Sprintf("Branch:%v", labels))
+	mes, errc := client.createSignedMessage("", true, "addBranch", payload, labels...)
+	if errc != nil {
+		return errc
+	}
+	ret, errs := client.sendMessage(mes, true)
+	if errs != nil {
+		return errs
+	}
+	if ret.ErrorMes != "" {
+		return fmt.Errorf(ret.ErrorMes)
+	}
+	return nil
+}
+
+//callbacl proto: function(id string, blockType string, block *TreeBlock)
+func (api *BchainAPI) GetTree(labels []string, blocks bool, entries bool, callback interface{}) error {
+	client, err := api.getClient()
+	if err != nil {
+		return err
+	}
+	if entries {
+		blocks = true
+	}
+	args := []string{fmt.Sprintf("%t", blocks), fmt.Sprintf("%t", entries)}
+	for _, label := range labels {
+		args = append(args, label)
+	}
+	_, errs := client.createSendMessage("", false, "getTree", args...)
+	if errs != nil {
+		return errs
+	}
+	f := reflect.ValueOf(callback)
+	for {
+		mes, err := client.getNextAnswer(1000)
+		if err != nil {
+			return err
+		}
+		if mes.Args[0] == "end" {
+			break
+		}
+		f.Call([]reflect.Value{reflect.ValueOf(mes.Args[0]), reflect.ValueOf(mes.Args[1]), reflect.ValueOf(mes.Block)})
 	}
 	return nil
 }
