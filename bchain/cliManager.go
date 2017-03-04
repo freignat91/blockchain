@@ -12,6 +12,7 @@ type bchainCLI struct {
 	verbose    bool
 	silence    bool
 	debug      bool
+	fullColor  bool
 	userName   string
 	keyPath    string
 }
@@ -40,7 +41,7 @@ func (m *bchainCLI) printf(col int, format string, args ...interface{}) {
 	if col > 0 && col < len(m.printColor) {
 		colorp = m.printColor[col]
 	}
-	if !m.verbose && col == colInfo {
+	if !m.verbose && col == colInfo && !m.fullColor {
 		return
 	}
 	if !m.debug && col == colDebug {

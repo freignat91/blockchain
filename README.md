@@ -204,11 +204,14 @@ get the whole blockchain tree of part of the tree and execute a callback functio
 - labels: the branch of the tree the function starts to read, if empty, the whole tree is read
 - blocks: if true get all blocks, if false get only branch blocks
 - entries: not used, on this version all the entries in the blocks are read at the same time
-- callback function call at each block read: function(id string, blockType string, block *gnode.TreeBlock) where blocktype can be either "branch" or "block" (see cli_display.go file as usage sample on it)
+- callback function call at each block read: `function(id string, blockType string, block *gnode.TreeBlock) error` where blocktype can be either "branch" or "block" (see cli_display.go file as usage sample on it)
 
 # tests
 
-execute: make test
+execute tests: 
+- start a new blockchain: make start
+- execute tests: make test
+- see resulting blockchain tree: bchain display --entries
 
 
 # versions

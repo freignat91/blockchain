@@ -33,7 +33,7 @@ func (h *TreeHash) setBlockHash(block *TreeBlock) {
 
 func (h *TreeHash) setBlockFullHash(t *TreeManager, block *TreeBlock) error {
 	data := make([]byte, hashLength*(len(block.BranchMap)+3), hashLength*(len(block.BranchMap)+3))
-	var size int64 = 1
+	var size int64 = int64(len(block.Entries))
 	nn := h.copyHash(data, 0, block.Hash)
 	if block.ChildId == "" {
 		nn += hashLength

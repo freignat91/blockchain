@@ -43,6 +43,10 @@ func (g *GNode) Healthcheck(ctx context.Context, req *HealthRequest) (*AntRet, e
 	if !g.healthy {
 		return nil, fmt.Errorf("Not ready")
 	}
+	if !g.initReady && g.nbNode != len(g.nodeNameList) {
+		return nil, fmt.Errorf("Blockchain is not yet ready")
+	}
+	g.initReady = true
 	return &AntRet{Ack: true}, nil
 }
 

@@ -231,7 +231,7 @@ func (api *BchainAPI) AddBranch(labels []string) error {
 	return nil
 }
 
-//callbacl proto: function(id string, blockType string, block *TreeBlock)
+//callbacl proto: function(id string, blockType string, block *TreeBlock) error
 func (api *BchainAPI) GetTree(labels []string, blocks bool, entries bool, callback interface{}) error {
 	client, err := api.getClient()
 	if err != nil {
@@ -257,7 +257,11 @@ func (api *BchainAPI) GetTree(labels []string, blocks bool, entries bool, callba
 		if mes.Args[0] == "end" {
 			break
 		}
-		f.Call([]reflect.Value{reflect.ValueOf(mes.Args[0]), reflect.ValueOf(mes.Args[1]), reflect.ValueOf(mes.Block)})
+		ret := f.Call([]reflect.Value{reflect.ValueOf(mes.Args[0]), reflect.ValueOf(mes.Args[1]), reflect.ValueOf(mes.Block)})
+		if ret[0].Interface() != nil {
+			err := ret[0].Interface().(error)
+			return err
+		}
 	}
 	return nil
 }

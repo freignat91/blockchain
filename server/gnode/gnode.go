@@ -36,6 +36,7 @@ type GNode struct {
 	lastIndexTime     time.Time
 	healthy           bool
 	ready             bool
+	initReady         bool
 	grpcReady         bool
 	traceMap          secureMap //map[string]*gnodeTrace
 	nbRouted          int64

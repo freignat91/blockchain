@@ -15,6 +15,7 @@ type treeDisplayer struct {
 	debug      bool
 	hash       bool
 	fullHashId bool
+	cli        *bchainCLI
 }
 
 // PlatformMonitor is the main command for attaching platform subcommands.
@@ -41,7 +42,7 @@ func init() {
 //For debug
 func (m *bchainCLI) displayTree(cmd *cobra.Command, args []string) error {
 	m.pInfo("Display\n")
-	d := treeDisplayer{}
+	d := treeDisplayer{cli: m}
 	if cmd.Flag("blocks").Value.String() == "true" {
 		d.isBlocks = true
 	}
@@ -59,6 +60,7 @@ func (m *bchainCLI) displayTree(cmd *cobra.Command, args []string) error {
 		d.hash = true
 	}
 	tapi := api.New(m.server)
+	m.fullColor = true
 	m.setAPI(tapi)
 	err := tapi.GetTree(args, d.isBlocks, d.isEntries, d.displayBlock)
 	if err != nil {
@@ -67,7 +69,7 @@ func (m *bchainCLI) displayTree(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func (d *treeDisplayer) displayBlock(id string, blockType string, block *gnode.TreeBlock) {
+func (d *treeDisplayer) displayBlock(id string, blockType string, block *gnode.TreeBlock) error {
 	if blockType == "branch" || d.isBlocks {
 		tab := ""
 		for i := 0; i < int(block.Depth); i++ {
@@ -78,20 +80,21 @@ func (d *treeDisplayer) displayBlock(id string, blockType string, block *gnode.T
 			id = fmt.Sprintf("hash=%x", d.shorterb(block.FullHash))
 		}
 		if blockType == "branch" {
-			fmt.Printf("%s%s: %s nb=%d branchLabel=%s:%s\n", tab, blockType, id, block.Size, block.LabelName, block.LabelValue)
+			d.cli.pSuccess("%s%s: %s nb=%d branchLabel=%s:%s\n", tab, blockType, id, block.Size, block.LabelName, block.LabelValue)
 		} else {
 			tab += "  "
-			fmt.Printf("%s%s: %s nb=%d\n", tab, blockType, id, block.Size)
+			d.cli.pRegular("%s%s: %s nb=%d\n", tab, blockType, id, block.Size)
 		}
 		if d.debug {
-			fmt.Printf("%sdebug:[parentId=%s childId=%s loaded=%t updated=%t]\n", tab, d.shorters(block.ParentId), d.shorters(block.ChildId), block.Loaded, block.Updated)
+			d.cli.pWarn("%sdebug:[parentId=%s childId=%s loaded=%t updated=%t]\n", tab, d.shorters(block.ParentId), d.shorters(block.ChildId), block.Loaded, block.Updated)
 		}
 		if d.isEntries {
 			for _, entry := range block.Entries {
-				fmt.Printf("%s->entry: %s date=%s user=%s labels=[%s]\n", tab, string(entry.Payload), d.getDate(entry), entry.UserName, d.getLabels(entry))
+				d.cli.pInfo("%s->entry: %s date=%s user=%s labels=[%s]\n", tab, string(entry.Payload), d.getDate(entry), entry.UserName, d.getLabels(entry))
 			}
 		}
 	}
+	return nil
 }
 
 func (d *treeDisplayer) getDate(entry *gnode.BCEntry) string {

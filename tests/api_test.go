@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-//time.Sleep(1*time.Second) need on v0.0.1, will be deleted on v0.0.2
+//time.Sleep(1*time.Second) needed on v0.0.1, will be deleted on v0.0.2
 
 func TestReady(t *testing.T) {
 	if err := bcapi.UserSignup("test", "/tmp/blockchain/private.key"); err != nil {
