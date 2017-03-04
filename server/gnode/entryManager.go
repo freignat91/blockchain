@@ -10,9 +10,10 @@ import (
 )
 
 type EntryManager struct {
-	nbId  int64
-	gnode *GNode
-	idMap map[string]*CheckRequestCounter
+	nbId          int64
+	gnode         *GNode
+	idMap         map[string]*CheckRequestCounter
+	requestQueuer requestQueuer
 }
 
 type CheckRequestCounter struct {
@@ -24,6 +25,7 @@ type CheckRequestCounter struct {
 func (m *EntryManager) init(g *GNode) {
 	m.gnode = g
 	m.idMap = make(map[string]*CheckRequestCounter)
+	m.requestQueuer.init(g, m)
 }
 
 func (m *EntryManager) getNewId() string {
@@ -52,18 +54,14 @@ func (m *EntryManager) addItem(mes *AntMes, isBranch bool) error {
 	//Verify user signature
 	payload := mes.Data
 	logf.info("Received add item: %s\n", string(payload))
-	labels := m.convertLabels(mes.Args)
+	labels, errl := m.convertLabels(mes.Args)
+	if errl != nil {
+		return errl
+	}
 	signedData := m.getDataToSign(mes.Data, labels)
 	if err := m.gnode.key.verifyUserSignature(mes.UserName, mes.Key, signedData); err != nil {
-		return fmt.Errorf("User %s not authenticated", mes.UserName)
+		return fmt.Errorf("User %s signature not authenticated", mes.UserName)
 	}
-	//Verify request validity
-	if _, err := m.gnode.treeManager.getLastExistingBranchBlock(labels, isBranch); err != nil {
-		return err
-	}
-	//Return answer to client
-	answer := m.gnode.createAnswer(mes, false)
-	m.gnode.senderManager.sendMessage(answer)
 	signMap := make(map[string][]byte)
 	timeNow, _ := time.Now().MarshalBinary()
 	entry := &BCEntry{
@@ -84,36 +82,43 @@ func (m *EntryManager) addItem(mes *AntMes, isBranch bool) error {
 	}
 	entryHash := getNewHash()
 	entryHash.setHash(entryData)
-	rootHash := m.computeRootHash(entryHash.hash)
 	req := &CheckEntryRequest{
 		Id:          m.getNewId(),
 		OriginNode:  m.gnode.name,
 		NodeSignMap: signMap,
 		Entry:       entryData,
 		EntryHash:   entryHash.hash,
-		RootHash:    rootHash,
 		IsBranch:    isBranch,
+		Labels:      labels,
 	}
-	if err := m.sendCheckEntry(req, ""); err != nil {
-		return fmt.Errorf("sendCheckEntry error: %v\n", err)
+	if err := m.requestQueuer.push(req); err != nil {
+		return err
 	}
+	//Return answer to client
+	answer := m.gnode.createAnswer(mes, false)
+	m.gnode.senderManager.sendMessage(answer)
 	return nil
 }
 
-func (m *EntryManager) convertLabels(args []string) []*TreeLabel {
+func (m *EntryManager) convertLabels(args []string) ([]*TreeLabel, error) {
 	labels := []*TreeLabel{}
 	for _, arg := range args {
 		list := strings.Split(arg, "=")
 		if len(list) == 1 {
+			if strings.Index(arg, "=") < 0 {
+				return nil, fmt.Errorf("Label format error, needs '=': %s", arg)
+			}
 			labels = append(labels, &TreeLabel{Name: list[0]})
-		} else {
+		} else if len(list) == 2 {
 			labels = append(labels, &TreeLabel{Name: list[0], Value: list[1]})
+		} else {
+			return nil, fmt.Errorf("Label format error: %s", arg)
 		}
 	}
-	return labels
+	return labels, nil
 }
 
-func (m *EntryManager) computeRootHash(entry []byte) []byte {
+func (m *EntryManager) computeRootHash() []byte {
 	return m.gnode.treeManager.root.FullHash
 }
 

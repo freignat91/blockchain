@@ -1,4 +1,4 @@
-syntax = "proto3";
+ syntax = "proto3";
 
 package gnode;
 
@@ -50,7 +50,8 @@ message CheckEntryRequest {
         bytes entry = 4;
         bytes entry_hash = 5;
         bytes root_hash = 6;
-        bool is_branch = 8;
+        bool is_branch = 7;
+        repeated TreeLabel labels = 8;
 }
 
 message AntMes {

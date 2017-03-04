@@ -135,10 +135,11 @@ Validate and add in the blockchain tree a new blockchain entry containing the pa
 
 ### display the blockchain tree
 
-`bchain display <--blocks> <--entries> <--debug> <--hash<> <--all>`
+`bchain display label1:val1 ... labeln:valn <--blocks> <--entries> <--debug> <--hash>`
 
 display the blockchain tree accordinling to the follwing options:
-- default: display blockchain tree banches only
+- default: display blockchain tree banches only starting from the branch corresponding to the labels abel1:val1 ... labeln:valn
+- abels abel1:val1 ... labeln:valn, the branch to display, default: root
 - --blocks: display the blocks under the branches
 - --entries: display the entries in the blocks
 - --debug: display blocks debug information (child id, paerent id, ...)

@@ -23,6 +23,7 @@ type GNodeConfig struct {
 	rootDataPath           string
 	tracePersistence       int
 	maxEntryNumberPerBlock int
+	entryStackSize         int
 }
 
 //update conf instance with default value and environment variables
@@ -48,6 +49,7 @@ func (cfg *GNodeConfig) setDefault() {
 	cfg.rootDataPath = cfg.dataPath
 	cfg.tracePersistence = 200
 	cfg.maxEntryNumberPerBlock = 3
+	cfg.entryStackSize = 100
 }
 
 //Update config with env variables
@@ -64,6 +66,7 @@ func (cfg *GNodeConfig) loadConfigUsingEnvVariable() {
 	cfg.nbDuplicateAck = cfg.getIntParameter("NB_DUPLICATE_ACK", cfg.nbDuplicateAck)
 	cfg.dataPath = cfg.getStringParameter("DATA_PATH", cfg.dataPath)
 	cfg.maxEntryNumberPerBlock = cfg.getIntParameter("MAX_ENTRIES_NB_PER_BLOCK", cfg.maxEntryNumberPerBlock)
+	cfg.entryStackSize = cfg.getIntParameter("ENTRY_STACK_SIZE", cfg.entryStackSize)
 }
 
 //display amp-pilot configuration

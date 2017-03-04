@@ -24,6 +24,7 @@ type BchainAPI struct {
 	logLevel    int
 	userName    string
 	key         *rsa.PrivateKey
+	client      *gnodeClient
 }
 
 // New create an blockchain api instance
@@ -49,12 +50,16 @@ func (api *BchainAPI) getNextServerAddr() string {
 }
 
 func (api *BchainAPI) getClient() (*gnodeClient, error) {
-	client := gnodeClient{}
+	if api.client != nil {
+		return api.client, nil
+	}
+	client := &gnodeClient{}
 	err := client.init(api)
 	if err != nil {
 		return nil, err
 	}
-	return &client, nil
+	api.client = client
+	return client, nil
 }
 
 func (api *BchainAPI) SetLogLevel(level string) {

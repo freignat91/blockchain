@@ -4,7 +4,7 @@ SHELL := /bin/sh
 BASEDIR := $(shell echo $${PWD})
 
 # build variables (provided to binaries by linker LDFLAGS below)
-VERSION := 0.0.1
+VERSION := 0.0.2
 
 LDFLAGS=-ldflags "-X=main.Version=$(VERSION)"
 
@@ -73,6 +73,9 @@ run: 	build
 test:   
 	@go test ./tests -v
 
+testp:
+	@go test ./testParallel -v
+
 install-deps:
 	@glide install --strip-vcs --strip-vendor --update-vendored
 
@@ -86,7 +89,7 @@ start:
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
 	--mount type=bind,source=/tmp/blockchain/data,target=/data \
-	--replicas=30 \
+	--replicas=5 \
 	$(IMAGE)
 
 
@@ -97,7 +100,7 @@ starttest:
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
 	--mount type=bind,source=/tmp/blockchain/data,target=/data \
-	--replicas=30 \
+	--replicas=5 \
 	$(IMAGETEST)
 
 stop:

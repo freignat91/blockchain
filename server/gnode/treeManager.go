@@ -111,6 +111,9 @@ func (t *TreeManager) addBranch(entry *BCEntry) error {
 	}
 	logf.info("lastExistingBranch: depth=%d label: %s=%s\n", branch.Depth, branch.LabelName, branch.LabelValue)
 	depth := int(branch.Depth)
+	if depth >= len(entry.Labels) {
+		return fmt.Errorf("Internal error branch depth > len entry.Labels")
+	}
 	if _, exist := branch.BranchMap[entry.Labels[depth].Value]; exist {
 		return fmt.Errorf("The branch alreday exists")
 	}
@@ -150,6 +153,9 @@ func (t *TreeManager) updateBlockBranch(block *TreeBlock) error {
 }
 
 func (t *TreeManager) getLastExistingBranchBlock(labels []*TreeLabel, isBranch bool) (*TreeBlock, error) {
+	if len(labels) == 0 {
+		return t.root, nil
+	}
 	branch, err := t.getLastExistingBranchBlockEff("root", labels, isBranch)
 	if err != nil {
 		return nil, err
@@ -177,6 +183,15 @@ func (t *TreeManager) getLastExistingBranchBlockEff(branchId string, labels []*T
 		return nil, err
 	}
 	depth := int(branch.Depth)
+	if isBranch {
+		if depth >= len(labels) {
+			return nil, fmt.Errorf("the branch already exist")
+		}
+	} else {
+		if depth > len(labels) {
+			return nil, fmt.Errorf("Impossible to create several branches in the same request: depth:%d labels:%v branchLabel:%s:%s", depth, labels, branch.LabelName, branch.LabelValue)
+		}
+	}
 	if branch.SubBranchLabelName == "" {
 		if isBranch {
 			branch.SubBranchLabelName = labels[depth].Name
@@ -277,6 +292,14 @@ func (t *TreeManager) rollbackBranch(block *TreeBlock) error {
 
 func (t *TreeManager) getTree(mes *AntMes) error {
 	fmt.Printf("getTree: %v\n", mes.Args)
+	labels, errl := t.gnode.entryManager.convertLabels(mes.Args[2:])
+	if errl != nil {
+		return errl
+	}
+	branch, err := t.getLastExistingBranchBlock(labels, false)
+	if err != nil {
+		return err
+	}
 	isBlocks := false
 	if mes.Args[0] == "true" {
 		isBlocks = true
@@ -285,7 +308,7 @@ func (t *TreeManager) getTree(mes *AntMes) error {
 	if mes.Args[1] == "true" {
 		isEntries = true
 	}
-	t.getTreeBranches(mes, "root", isBlocks, isEntries, "branch")
+	t.getTreeBranches(mes, branch.Id, isBlocks, isEntries, "branch")
 	answer := t.gnode.createAnswer(mes, false)
 	answer.Args = []string{"end"}
 	t.gnode.sendBackClient(answer.FromClient, answer)
