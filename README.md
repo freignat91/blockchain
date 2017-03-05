@@ -138,12 +138,30 @@ Validate and add in the blockchain tree a new blockchain entry containing the pa
 `bchain display label1:val1 ... labeln:valn <--blocks> <--entries> <--debug> <--hash>`
 
 display the blockchain tree accordinling to the follwing options:
-- default: display blockchain tree banches only starting from the branch corresponding to the labels abel1:val1 ... labeln:valn
-- abels abel1:val1 ... labeln:valn, the branch to display, default: root
+- default: display blockchain tree banches starting from the branch corresponding to the labels: label1:val1 ... labeln:valn
+- label1:val1 ... labeln:valn, the branch to display, default: root
 - --blocks: display the blocks under the branches
 - --entries: display the entries in the blocks
 - --debug: display blocks debug information (child id, paerent id, ...)
 - --hash: display blocls hash instead of id
+
+
+### display a "add request" status 
+
+`bchain add status [id]`
+
+retrieve the status of the "add request" having the id [id]
+
+
+### display last "add request" status 
+
+`bchain add last [nb] <--userName [userName]> <--errorOnly>`
+
+retrieve the [nb] last "add request" status
+Arguments:
+- nb: number of returned status
+- --userName return only the status belonging to the user UserName
+- --errorOnly: return only the status on error
 
 
 # API
@@ -206,6 +224,21 @@ get the whole blockchain tree of part of the tree and execute a callback functio
 - blocks: if true get all blocks, if false get only branch blocks
 - entries: not used, on this version all the entries in the blocks are read at the same time
 - callback function call at each block read: `function(id string, blockType string, block *gnode.TreeBlock) error` where blocktype can be either "branch" or "block" (see cli_display.go file as usage sample on it)
+
+### func (api *BchainAPI) AddRequestStatus(id string) (*gnode.RequestStatus, error) 
+
+get the requestStatus having the id "id" and return an instance of RequestStatus
+Argument:
+- id, the request id (returned by function addEntry or addBranch)
+
+### func (api *BchainAPI) LastAddRequestStatus(nb int, userName string, errorOnly bool, callback interface{}) error
+
+get the nb last add requests, for each execute a callback function
+Arguments:
+- nb: number of request to get
+- userName: if != "", return only the status beloging to the user
+- errorOnly: if true, return only the status on error
+- callback function exectuted for each status, proto: function(status *RequestStatus) error
 
 # tests
 

@@ -27,7 +27,7 @@ func (m *bchainCLI) NodeWriteStats(cmd *cobra.Command, args []string) error {
 	if len(args) >= 1 {
 		node = args[0]
 	}
-	m.pInfo("Execute: writeTrage\n")
+	m.pInfo("Execute: writeStats\n")
 	tapi := api.New(m.server)
 	m.setAPI(tapi)
 	if err := tapi.InfoWriteStats(node); err != nil {

@@ -32,9 +32,10 @@ func (m *bchainCLI) addBranch(cmd *cobra.Command, args []string) error {
 	if err := m.setAPI(tapi); err != nil {
 		return err
 	}
-	if err := tapi.AddBranch(args); err != nil {
-		return err
+	id, erra := tapi.AddBranch(args)
+	if erra != nil {
+		return erra
 	}
-	m.pSuccess("branch sent\n")
+	m.pSuccess("Add branch request accepted id: %s\n", id)
 	return nil
 }

@@ -32,9 +32,10 @@ func (m *bchainCLI) addEntry(cmd *cobra.Command, args []string) error {
 	if err := m.setAPI(tapi); err != nil {
 		return err
 	}
-	if err := tapi.AddEntry([]byte(args[0]), args[1:]); err != nil {
-		return err
+	id, erra := tapi.AddEntry([]byte(args[0]), args[1:])
+	if erra != nil {
+		return erra
 	}
-	m.pSuccess("entry sent\n")
+	m.pSuccess("Add entry request accepted id: %s\n", id)
 	return nil
 }

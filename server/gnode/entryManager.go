@@ -9,37 +9,30 @@ import (
 	"golang.org/x/net/context"
 )
 
-type EntryManager struct {
-	nbId          int64
-	gnode         *GNode
-	idMap         map[string]*CheckRequestCounter
-	requestQueuer requestQueuer
-}
+const (
+	ReqStatusAccepted = "accepted"
+	ReqStatusOnGoing  = "on going"
+	ReqStatusOnError  = "on error"
+	ReqStatusExecuted = "executed"
+)
 
-type CheckRequestCounter struct {
-	nbOk   int
-	nbSame int
-	done   bool
+type EntryManager struct {
+	nbId                 int64
+	gnode                *GNode
+	requestQueuer        requestQueuer
+	requestStatusManager RequestStatusManager
 }
 
 func (m *EntryManager) init(g *GNode) {
+	fmt.Println("init EntryManager")
 	m.gnode = g
-	m.idMap = make(map[string]*CheckRequestCounter)
+	m.requestStatusManager.init(g)
 	m.requestQueuer.init(g, m)
 }
 
 func (m *EntryManager) getNewId() string {
 	m.nbId++
-	return fmt.Sprintf("%s-%d", m.gnode.host, m.nbId)
-}
-
-func (m *EntryManager) getRequestCounter(id string) *CheckRequestCounter {
-	if counter, ok := m.idMap[id]; ok {
-		return counter
-	}
-	counter := &CheckRequestCounter{}
-	m.idMap[id] = counter
-	return counter
+	return fmt.Sprintf("%s%x%x", m.gnode.host, time.Now().UnixNano(), m.nbId)
 }
 
 func (m *EntryManager) addBranch(mes *AntMes) error {
@@ -63,7 +56,7 @@ func (m *EntryManager) addItem(mes *AntMes, isBranch bool) error {
 		return fmt.Errorf("User %s signature not authenticated", mes.UserName)
 	}
 	signMap := make(map[string][]byte)
-	timeNow, _ := time.Now().MarshalBinary()
+	timeNow := time.Now().Unix()
 	entry := &BCEntry{
 		Date:          timeNow,
 		Labels:        labels,
@@ -90,12 +83,15 @@ func (m *EntryManager) addItem(mes *AntMes, isBranch bool) error {
 		EntryHash:   entryHash.hash,
 		IsBranch:    isBranch,
 		Labels:      labels,
+		UserName:    entry.UserName,
 	}
 	if err := m.requestQueuer.push(req); err != nil {
 		return err
 	}
 	//Return answer to client
+	m.requestStatusManager.createReqStatus(req, entry)
 	answer := m.gnode.createAnswer(mes, false)
+	answer.Args = []string{req.Id}
 	m.gnode.senderManager.sendMessage(answer)
 	return nil
 }
@@ -141,9 +137,8 @@ func (m *EntryManager) sendCheckEntryToTarget(target *gnodeTarget, req *CheckEnt
 
 func (m *EntryManager) checkEntry(req *CheckEntryRequest) error {
 	//Vertify if not already added in blockchain
-	counter := m.getRequestCounter(req.Id)
-	if counter.done {
-		//fmt.Printf("Received alreday treated CheckEntry: %s\n", req.Id)
+	status := m.requestStatusManager.getCreateReqStatus(req.Id, req.UserName)
+	if status.Done {
 		return nil
 	}
 	logf.info("Received CheckEntry: %s\n", req.Id)
@@ -160,8 +155,8 @@ func (m *EntryManager) checkEntry(req *CheckEntryRequest) error {
 
 	//If not already verify then verify and sign it
 	if _, exist := req.NodeSignMap[m.gnode.name]; !exist {
-		if !m.verifyEntry(req) {
-			logf.warn("Entry request %s not validated\n", req.Id)
+		if err := m.verifyEntry(req); err != nil {
+			m.requestStatusManager.setReqStatusError(req.Id, "not valid:", err)
 			return nil
 		}
 	}
@@ -169,71 +164,67 @@ func (m *EntryManager) checkEntry(req *CheckEntryRequest) error {
 	//if majority of nodes accepted it then add it in blockchain
 	logf.info("Entry nbNode ok=%d\n", nb)
 	if nb > m.gnode.nbNode/2 {
-		m.addItemInBlockchain(req.Entry, req.EntryHash, req.IsBranch)
-		counter.done = true
+		if err := m.addItemInBlockchain(req.Entry, req.EntryHash, req.IsBranch); err != nil {
+			m.requestStatusManager.setReqStatusError(req.Id, "add error:", err)
+		} else {
+			m.requestStatusManager.setReqStatus(req.Id, ReqStatusExecuted)
+		}
+		status.Done = true
 	}
 
 	//if received too much time the same unchanged request then set as done
-	if counter.nbOk == nb {
-		counter.nbSame++
-		if counter.nbSame > m.gnode.nbNode*2 {
-			logf.warn("Received too many time the same request %s with no more node validation: cancel request\n", req.Id)
-			counter.done = true
+	if int(status.NbOk) == nb {
+		status.NbSame++
+		if int(status.NbSame) > m.gnode.nbNode*2 {
+			m.requestStatusManager.setReqStatusError(req.Id, "not validated at majority", nil)
+			status.Done = true
 			return nil
 		}
 	}
-	counter.nbOk = nb
+	status.NbOk = int32(nb)
 
 	//send back the updated request to all connections expect the one it comes from.
 	originNode := req.OriginNode
 	req.OriginNode = m.gnode.name
 	if err := m.sendCheckEntry(req, originNode); err != nil {
-		return fmt.Errorf("sendCheckEntry error: %v\n", err)
+		return err
 	}
 	return nil
 }
 
-func (m *EntryManager) verifyEntry(req *CheckEntryRequest) bool {
+func (m *EntryManager) verifyEntry(req *CheckEntryRequest) error {
 	logf.info("Verify entry request: %s\n", req.Id)
 
 	//verify root hash
 	if string(m.gnode.treeManager.root.FullHash) != string(req.RootHash) {
-		logf.error("Roothash not authenticate\n")
-		return false
+		return fmt.Errorf("root hash not authenticate")
 	}
 	//Verify entry hash
 	hash := getNewHash()
 	hash.setHash(req.Entry)
 	if string(hash.hash) != string(req.EntryHash) {
-		logf.error("Entry hash not authenticate\n")
-		return false
+		return fmt.Errorf("entry hash not authenticate")
 	}
 	//unmarchal entry
 	entry := &BCEntry{}
 	if err := proto.Unmarshal(req.Entry, entry); err != nil {
-		logf.error("unmarshaling entry error: %v\n", err)
-		return false
+		return fmt.Errorf("unmarshaling entry error: %v", err)
 	}
 	logf.info("Entry: %s\n", m.entryString(entry))
 
 	//Verify the entry user signature
 	signedData := m.getDataToSign(entry.Payload, entry.Labels)
 	if err := m.gnode.key.verifyUserSignature(entry.UserName, entry.UserSignature, signedData); err != nil {
-		logf.error("User %s not authenticated in entry\n", entry.UserName)
-		return false
+		return fmt.Errorf("user %s not authenticated in entry\n", entry.UserName)
 	}
 
 	//add the node signature
 	signature, err := m.gnode.key.sign(req.Entry)
 	if err != nil {
-		logf.warn("node signature error: ", err)
-		return false
+		return fmt.Errorf("node signature error: ", err)
 	}
 	req.NodeSignMap[m.gnode.name] = signature
-
-	//verify root hashs
-	//TODO
-	return true
+	return nil
 }
 
 func (m *EntryManager) entryString(e *BCEntry) string {

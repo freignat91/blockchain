@@ -62,10 +62,10 @@ func (q *requestQueuer) startReader() {
 				logf.info("Send req id=%s labels=%v\n", req.Id, req.Labels)
 				if _, errc := q.gnode.treeManager.getLastExistingBranchBlock(req.Labels, req.IsBranch); errc == nil {
 					if err := q.manager.sendCheckEntry(req, ""); err != nil {
-						logf.error("sendCheckEntry error: %v\n", err)
+						q.manager.requestStatusManager.setReqStatusError(req.Id, "sendCheckEntry error:", err)
 					}
 				} else {
-					logf.error("entry control error: %v\n", errc)
+					q.manager.requestStatusManager.setReqStatusError(req.Id, "request control error:", errc)
 				}
 			} else {
 				time.Sleep(1 * time.Second)

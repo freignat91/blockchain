@@ -9,6 +9,8 @@ import (
 	"log"
 	"reflect"
 	"strings"
+
+	"github.com/freignat91/blockchain/server/gnode"
 )
 
 const (
@@ -194,44 +196,93 @@ func (api *BchainAPI) UserRemove(name string) error {
 	return nil
 }
 
-func (api *BchainAPI) AddEntry(entry []byte, labels []string) error {
+func (api *BchainAPI) AddEntry(entry []byte, labels []string) (string, error) {
 	client, err := api.getClient()
 	if err != nil {
-		return err
+		return "", err
 	}
 	mes, errc := client.createSignedMessage("", true, "addEntry", entry, labels...)
 	if errc != nil {
-		return errc
+		return "", errc
 	}
 	ret, errs := client.sendMessage(mes, true)
 	if errs != nil {
-		return errs
+		return "", errs
 	}
 	if ret.ErrorMes != "" {
-		return fmt.Errorf(ret.ErrorMes)
+		return "", fmt.Errorf(ret.ErrorMes)
 	}
-	return nil
+	if len(ret.Args) != 1 {
+		return "", fmt.Errorf("Invalid request id has been returned")
+	}
+	return ret.Args[0], nil
 }
 
-func (api *BchainAPI) AddBranch(labels []string) error {
+func (api *BchainAPI) AddBranch(labels []string) (string, error) {
 	if len(labels) == 0 {
-		return fmt.Errorf("A banch need at least one label")
+		return "", fmt.Errorf("A banch need at least one label")
 	}
 	client, err := api.getClient()
 	if err != nil {
-		return err
+		return "", err
 	}
 	payload := []byte(fmt.Sprintf("Branch:%v", labels))
 	mes, errc := client.createSignedMessage("", true, "addBranch", payload, labels...)
 	if errc != nil {
-		return errc
+		return "", errc
 	}
 	ret, errs := client.sendMessage(mes, true)
 	if errs != nil {
-		return errs
+		return "", errs
 	}
 	if ret.ErrorMes != "" {
-		return fmt.Errorf(ret.ErrorMes)
+		return "", fmt.Errorf(ret.ErrorMes)
+	}
+	if len(ret.Args) != 1 {
+		return "", fmt.Errorf("Invalid request id has been returned ")
+	}
+	return ret.Args[0], nil
+}
+
+func (api *BchainAPI) AddRequestStatus(id string) (*gnode.RequestStatus, error) {
+	client, err := api.getClient()
+	if err != nil {
+		return nil, err
+	}
+	ret, errs := client.createSendMessage("", true, "addRequestStatus", id)
+	if errs != nil {
+		return nil, errs
+	}
+	if ret.Status == nil {
+		return nil, fmt.Errorf("Request not found")
+	}
+	return ret.Status, nil
+}
+
+//callbacl proto: function(status *RequestStatus) error
+func (api *BchainAPI) LastAddRequestStatus(nb int, userName string, errorOnly bool, callback interface{}) error {
+	client, err := api.getClient()
+	if err != nil {
+		return err
+	}
+	_, errs := client.createSendMessage("", false, "lastAddRequestStatus", fmt.Sprintf("%d", nb), userName, fmt.Sprintf("%t", errorOnly))
+	if errs != nil {
+		return errs
+	}
+	f := reflect.ValueOf(callback)
+	for {
+		mes, err := client.getNextAnswer(1000)
+		if err != nil {
+			return err
+		}
+		if len(mes.Args) == 1 && mes.Args[0] == "end" {
+			break
+		}
+		ret := f.Call([]reflect.Value{reflect.ValueOf(mes.Status)})
+		if ret[0].Interface() != nil {
+			err := ret[0].Interface().(error)
+			return err
+		}
 	}
 	return nil
 }

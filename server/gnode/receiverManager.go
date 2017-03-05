@@ -45,6 +45,8 @@ func (m *ReceiverManager) loadFunctions() {
 	//EntryManager function
 	m.functionMap["addEntry"] = m.gnode.entryManager.addEntry
 	m.functionMap["addBranch"] = m.gnode.entryManager.addBranch
+	m.functionMap["addRequestStatus"] = m.gnode.entryManager.requestStatusManager.addRequestStatus
+	m.functionMap["lastAddRequestStatus"] = m.gnode.entryManager.requestStatusManager.lastAddRequestStatus
 	m.functionMap["getTree"] = m.gnode.treeManager.getTree
 }
 

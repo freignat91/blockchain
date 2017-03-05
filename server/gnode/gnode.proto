@@ -13,7 +13,7 @@ service GNodeService {
 }
 
 message BCEntry {
-        bytes date = 1;
+        int64 date = 1;
         repeated TreeLabel labels = 2;
         bytes payload = 3;
         string user_name = 4;
@@ -52,6 +52,18 @@ message CheckEntryRequest {
         bytes root_hash = 6;
         bool is_branch = 7;
         repeated TreeLabel labels = 8;
+        string user_name = 9;
+}
+
+message RequestStatus {
+        string id = 1;
+        int64 date = 2;
+        string status = 3;
+        string reqError = 4;
+        int32 nbOk = 5;  
+        int32 nbSame = 6;  
+        bool done = 7;
+        string user_name = 8;
 }
 
 message AntMes {
@@ -76,6 +88,7 @@ message AntMes {
         bytes key = 19;
         bytes data = 20;
         TreeBlock block = 21;
+        RequestStatus status = 22;
 }
 
 message AntRet{

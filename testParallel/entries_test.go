@@ -42,7 +42,7 @@ func TestReady(t *testing.T) {
 	for nn := 0; nn < 100; nn++ {
 		labels := branches[rand.Int31n(int32(len(branches)))]
 		entry := fmt.Sprintf("doc-%s-%d", user, nn)
-		if err := bcapi.AddEntry([]byte(entry), labels); err != nil {
+		if _, err := bcapi.AddEntry([]byte(entry), labels); err != nil {
 			t.Fatalf("error: %v\n", err)
 		}
 	}

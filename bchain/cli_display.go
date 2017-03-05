@@ -98,11 +98,8 @@ func (d *treeDisplayer) displayBlock(id string, blockType string, block *gnode.T
 }
 
 func (d *treeDisplayer) getDate(entry *gnode.BCEntry) string {
-	entryTime := time.Now()
-	if err := entryTime.UnmarshalBinary(entry.Date); err != nil {
-		return fmt.Sprintf("<%v>", err)
-	}
-	return entryTime.Format("2006-01-02T15:04:05.000000000")
+	dt := time.Unix(entry.Date, 0)
+	return dt.Format("2006-01-02T15:04:05")
 }
 
 func (d *treeDisplayer) getLabels(entry *gnode.BCEntry) string {

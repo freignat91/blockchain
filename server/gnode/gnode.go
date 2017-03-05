@@ -112,6 +112,7 @@ func (g *GNode) init() {
 	g.nodeFunctions = &nodeFunctions{gnode: g}
 	g.startRESTAPI()
 	g.startGRPCServer()
+	g.entryManager.init(g)
 	g.receiverManager.start(g, config.bufferSize, config.parallelReceiver)
 	g.senderManager.start(g, config.bufferSize, config.parallelSender)
 	time.Sleep(3 * time.Second)
@@ -121,12 +122,12 @@ func (g *GNode) initFromFileSystem() {
 	os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0600)
 	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0600)
 	g.loadUser()
-	g.entryManager.init(g)
 	if err := g.treeManager.init(g); err != nil {
 		logf.error("treeManager init error: %v\n", err)
 		os.Exit(1)
 	}
 }
+
 func (g *GNode) startGRPCServer() {
 	s := grpc.NewServer()
 	RegisterGNodeServiceServer(s, g)
