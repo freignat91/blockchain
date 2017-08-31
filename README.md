@@ -18,36 +18,100 @@ This project is an experimental project aiming to build a full secured block cha
 This project will incrementally move to v1.0.0 if it is prove to work as expected, stop if not.
 
 
-# Install
+# Build
 
-It needsfirst Docker 1.13 installed, then
+No need to build the project to use it on OSX, it's possible to use directly the freignat91/blockchain:latest image in docker hub and the built-in CLI for OSX
 
-- clone the git project: https://github.com/freignat91/blockchain
+Build prerequisite:
+        - Docker version 17.06.1-ce (minimum)
+
+- cd $GOPATH/src/github.com (create it if not exist)
+- clone the git project: git clone git@github.com:freignat91/blockchain
 - execute `make install` to build the antblockchain CLI executable
 - execute `make build` to create a image freignat91/blockchain:latest
-- exec
-- execute the command `make start` to initialize swarm, create an overlay network and start the antblockchain service on this network
-- it starts a 30 nodes blockchain services locally
+
+# Usage
+
+- for OSX: download the binary CLI from the git project: bin/osx/bchain  
+- for other OS,it's needed to build the project in order to get your os version of the CLI
+- then, execute the command `make start` to initialize swarm, create an overlay network and start the antblockchain service on this network
+- it starts a 5 nodes blockchain services locally
 
 antblockchain can't be used as a single container, it needs to be started as a service on a swarm machine (manager or worker).
 
-an docker image is available on docker hub: freignat91/blockchain:latest
-
 antblockchain take more time to start than the "ready" docker status. Every CLI command executed before will be rejected with a message "Node not yet ready"
-The anblockchain is really ready when the CLI command `bchain node info` display the 30 nodes at each call
+The anblockchain is really ready when the CLI command `bchain node info` display the 5 nodes at each call
+
+# Demo
+
+## start the server
+
+- make start
+- wait for all nodes ready using command `bchain node info` until all nodes are listed
+
+## create an authenticated user
+
+  - bchain user signup anuser
+  - mv private.key ~/.config/antblockchain
+
+## configure the user client side
+
+  - create file ~/.config/antblockchain/blockchain.yaml having the content:
+    ```
+    serveraddress: 127.0.0.1
+    serverport: "30103"
+    username: anuser
+    keypath: /Users/anuser/.config/antblockchain/private.key
+    ```
+
+## create first level of blockchain branches with custom attribute 'organization'
+
+ - bchain add branch organization=company1
+ - bchain add branch organization=company2
+ - bchain display
+
+## create second level of blockchain branches with custom attribute 'member'
+
+  - bchain add branch organization=company1 member=member11
+  - bchain add branch organization=company1 member=member12
+  - bchain add branch organization=company2 member=member21
+  - bchain add branch organization=company2 member=member22
+  - bchain display
+
+## add entries on some branches
+
+  - bchain add entry organization=company1 member=member12 doc121
+  - bchain add entry organization=company1 member=member12 doc122
+  - bchain add entry organization=company1 member=member12 doc123
+  - bchain add entry organization=company2 member=member22 doc221
+  - bchain add entry organization=company2 member=member22 doc222
+  - bchain display entries
 
 
-# Configuration using System Variables:
+# Docker service Configuration using System Variables:
 
 
 - GRPCPORT:               grpc server port used by nodes (default 30103)
 - NB_LINE_CONNECT:        number of "line" type connection in grid: default 0 means computed automatically
 - NB_CROSS_CONNECT:       number of "cross" type connection in grid: default 0 means computed automatically
-- DATA_PATH:              path in container where file data is stored: default: /data (should be mapped on host using mount docker argument (--mount 
+- DATA_PATH:              path in container where file data is stored: default: /data (should be mapped on host using mount docker argument (--mount
 type=bind,source=/[hostpath],target=/data)
 - MAX_ENTRIES_NB_PER_BLOCK: max entries number per block, for debug reason default is 3
 
+# service configuration on client side
 
+the file ~/.config/antblockchain/blockchain.yaml should exist on client side to store the server address/port, the current user name and token path
+
+the token file (private.key) is given by the command: `bchain user signup <userName>`
+
+blockchain.yaml file example:
+
+```
+serveraddress: 127.0.0.1
+serverport: "30103"
+username: anuser
+keypath: /Users/anuser/.config/antblockchain/private.key
+```
 
 # Resilience
 
@@ -60,8 +124,8 @@ To simulate nodes connections using different parameters as, node number, line c
 
 `bchain grid simul [nodes] <--line xx > <--cross yy>`
 - [nodes] the number of nodes
-- <--line xx> optionally: xx the number of line connections 
-- <--cross yy> optionally: yy the number of cross connections 
+- <--line xx> optionally: xx the number of line connections
+- <--cross yy> optionally: yy the number of cross connections
 
 this command as not effect on the real cluster grid connections, see:
 - ./docs/grid-building.pptx
@@ -115,7 +179,7 @@ Display the full list of nodes with their names, root hash, number of users, num
 `bchain node ping |node]`
 - [node] the node name to ping
 
-### add a new branch in the blockchain 
+### add a new branch in the blockchain
 
 `bchain add branch <label1=value1> <label2=value2> ...`
 
@@ -197,7 +261,7 @@ Arguments:
 
 List the node of the cluster with information
 
-### func (api *BchainAPI) GetTree(labels []string, blocks bool, entries bool, callback interface{}) error 
+### func (api *BchainAPI) GetTree(labels []string, blocks bool, entries bool, callback interface{}) error
 
 get the whole blockchain tree of part of the tree and execute a callback function for each block
 
@@ -208,7 +272,7 @@ get the whole blockchain tree of part of the tree and execute a callback functio
 
 # tests
 
-execute tests: 
+execute tests:
 - start a new blockchain: make start
 - execute tests: make test
 - see resulting blockchain tree: bchain display --entries
@@ -224,7 +288,7 @@ execute tests:
 - a remote api and an antblockchain CLI based on it, called "bchain" are available
 - user can be created with RSA keys paire, the public one is send to the nodes, the private one is kept by the user. Users can be removed.
 - the blockchain tree manage a Merkel tree to store blockchain entries and ensure its integrity. The tree is replicated on each node and can be extends adding new branches. Each branch is defined by a label name=value list, one at each tree depth/branch See ./docs/blochchain-tree.pptx
-- a new blockchain entry can be added at the end of any branch, found using a list of label name=value), the new entry in sign by the user who execute the command and verified by all the nodes to be accepted only if majority of nodes answer it's ok. 
+- a new blockchain entry can be added at the end of any branch, found using a list of label name=value), the new entry in sign by the user who execute the command and verified by all the nodes to be accepted only if majority of nodes answer it's ok.
 - Each node verify the user signature, the others nodes signatures, the entry signature, the Merkel tree integrity, the root hash, before validating any entry or branch adding request
 - the blockchain tree can be display with debug information
 - the service nodes list can be display with status and information
@@ -236,7 +300,7 @@ On the v0.0.1 the blockchain works completly with the folowing limitations which
 - -> need to be able to remove definitelly a node or add a new one
 - the blockchain tree is fully replicated on each node
 - -> needs to add optional sharding based on branches labels
-- the blochchain entry payload is a byte array with no extensible behavior or dedicated verifications 
+- the blochchain entry payload is a byte array with no extensible behavior or dedicated verifications
 - -> need dedicated interfaces to make possible to extend it
 - the remote api is GRPC only
 - -> needs REST API
@@ -257,4 +321,3 @@ On the v0.0.1 the blockchain works completly with the folowing limitations which
 
 antblockchain is licensed under the Apache License, Version 2.0. See https://github.com/freignat91/blockchain/blob/master/LICENSE
 for the full license text.
-

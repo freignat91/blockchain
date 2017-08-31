@@ -63,7 +63,7 @@ func (g *GNode) createUser(userName string, publicKey []byte) error {
 		g.loadOneUser(userName)
 		return fmt.Errorf("User %s : already exist", userName)
 	}
-	os.MkdirAll(path.Join(config.rootDataPath, "users"), os.ModeDir)
+	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0700)
 	pubBytes := pem.EncodeToMemory(&pem.Block{
 		Type:  "RSA PUBLIC KEY",
 		Bytes: publicKey,

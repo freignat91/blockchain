@@ -2,13 +2,13 @@ package gnode
 
 import (
 	"fmt"
-	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"net"
 	"os"
-	"path"
 	"sync"
 	"time"
+
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
 )
 
 var (
@@ -118,8 +118,8 @@ func (g *GNode) init() {
 }
 
 func (g *GNode) initFromFileSystem() {
-	os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0600)
-	os.MkdirAll(path.Join(config.rootDataPath, "users"), 0600)
+	//os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0600)
+	//os.MkdirAll(path.Join(config.rootDataPath, "users"), 0600)
 	g.loadUser()
 	g.entryManager.init(g)
 	if err := g.treeManager.init(g); err != nil {

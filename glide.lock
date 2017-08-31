@@ -1,16 +1,20 @@
-hash: 5109cac781538a7474d580f9425d45f8523c0b38c8bd41bb84d1c61dd3762782
-updated: 2017-03-02T22:59:41.912704958+01:00
+hash: 9a05dddc02db4770af8a6b04d15d6bd52ca75490bcf588bd426f4c6f5d09f891
+updated: 2017-08-31T10:19:11.819187182+02:00
 imports:
 - name: github.com/fatih/color
-  version: 7824417a424b65227be8ac9b14d545a7f3e6c3f0
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
 - name: github.com/fsnotify/fsnotify
-  version: 7d7316ed6e1ed2de075aab8dfc76de5d158d66e1
+  version: 4da3e2cfbabc9f751898f250b49f2439785783a1
 - name: github.com/golang/protobuf
-  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+  version: 18c9bb3261723cd5401db4d0c9fbc5c3b6c70fe8
   subpackages:
   - proto
+  - ptypes
+  - ptypes/any
+  - ptypes/duration
+  - ptypes/timestamp
 - name: github.com/hashicorp/hcl
-  version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
+  version: 8f6b1344a92ff8877cf24a5de9177bf7d0a2a187
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -23,42 +27,42 @@ imports:
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/magiconair/properties
-  version: b3b15ef068fd0b17ddf408a23669f20811d194d2
+  version: be5ece7dd465ab0765a9682137865547526d1dfb
 - name: github.com/mattn/go-colorable
   version: 5411d3eea5978e6cdc258b30de592b60df6aba96
   repo: https://github.com/mattn/go-colorable
 - name: github.com/mattn/go-isatty
-  version: dda3de49cbfcec471bd7a70e6cc01fcc3ff90109
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
   repo: https://github.com/mattn/go-isatty
 - name: github.com/mitchellh/go-homedir
   version: b8bc1bf767474819792c23f32d8286a45736f1c6
 - name: github.com/mitchellh/mapstructure
-  version: 482a9fd5fa83e8c4e7817413b80f3eb8feec03ef
-- name: github.com/pelletier/go-buffruneio
-  version: c37440a7cf42ac63b919c752ca73a85067e05992
+  version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/pelletier/go-toml
-  version: 13d49d4606eb801b8f01ae542b4afc4c6ee3d84a
+  version: 9c1b4e331f1e3d98e72600677699fbe212cd6d16
 - name: github.com/spf13/afero
-  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
+  version: 36f8810e2e3d7eeac4ac05b57f65690fbfba62a2
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: f820543c3592e283e311a60d2a600a664e39f6f7
+  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
   version: 35136c09d8da66b901337c6e86fd8e88a1a255bd
 - name: github.com/spf13/jwalterweatherman
-  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
+  version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
   version: 9ff6c6923cfffbcd502984b8e0c80539a94968b7
 - name: github.com/spf13/viper
-  version: 5ed0fc31f7f453625df314d8e66b9791e8d13003
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: golang.org/x/net
-  version: 4876518f9e71663000c348837735820161a42df7
+  version: da118f7b8e5954f39d0d2130ab35d4bf0e3cb344
   subpackages:
   - context
   - http2
   - http2/hpack
+  - idna
   - internal/timeseries
+  - lex/httplex
   - trace
 - name: golang.org/x/sys
   version: e24f485414aeafb646f6fca458b0bf869c0880a1
@@ -66,23 +70,33 @@ imports:
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: d680ca3ed853995402af43b866311167281bdc20
+  version: 470f45bf29f4147d6fbd7dfd0a02a848e49f5bf4
   subpackages:
+  - secure/bidirule
   - transform
+  - unicode/bidi
   - unicode/norm
+- name: google.golang.org/genproto
+  version: ee236bd376b077c7a89f260c026c4735b195e459
+  subpackages:
+  - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
+  version: f92cdcd7dcdc69e81b2d7b338479a19a8723cfa3
   subpackages:
   - codes
+  - connectivity
   - credentials
+  - grpclb/grpc_lb_v1/messages
   - grpclog
   - internal
+  - keepalive
   - metadata
   - naming
   - peer
   - stats
+  - status
   - tap
   - transport
 - name: gopkg.in/yaml.v2
-  version: bef53efd0c76e49e6de55ead051f886bea7e9420
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports: []

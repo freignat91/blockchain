@@ -71,7 +71,7 @@ func (cfg *CliConfig) loadConfig() {
 	cfg.serverPort = viper.AllSettings()["serverport"].(string)
 	cfg.userName = viper.AllSettings()["username"].(string)
 	cfg.keyPath = viper.AllSettings()["keypath"].(string)
-	cfg.colorTheme = viper.AllSettings()["colortheme"].(string)
+	//cfg.colorTheme = viper.AllSettings()["colortheme"].(string)
 	/*
 		if err := viper.Unmarshal(cfg); err != nil {
 			fmt.Println("Unmarshal antblockchain conffile error: %v\n", err)

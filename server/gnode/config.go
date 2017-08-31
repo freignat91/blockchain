@@ -68,7 +68,7 @@ func (cfg *GNodeConfig) loadConfigUsingEnvVariable() {
 
 //display amp-pilot configuration
 func (cfg *GNodeConfig) displayConfig(version string, build string) {
-	fmt.Printf("antblockchain version: %v build: %s\n", version, build)
+	fmt.Printf("antblockchain version: %v\n", version)
 	fmt.Println("----------------------------------------------------------------------------")
 	fmt.Println("Configuration:")
 	if cfg.nbLineConnect == 0 {

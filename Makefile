@@ -34,21 +34,21 @@ TESTS := tests
 
 all: version check install
 
-version: 
+version:
 	@echo "version: $(VERSION)"
 
-clean: 
+clean:
 	@rm -rf $(GENERATED)
 
-install-client: 
+install-client:
 	@go install $(LDFLAGS) $(REPO)/$(CLIENT)
 
-install-server: 
-	@go install $(LDFLAGS) $(REPO)/$(SERVER)  
+install-server:
+	@go install $(LDFLAGS) $(REPO)/$(SERVER)
 
 install: install-server install-client
 
-proto: 
+proto:
 	@protoc server/gnode/gnode.proto --go_out=plugins=grpc:.
 
 # format and simplify if possible (https://golang.org/cmd/gofmt/#hdr-The_simplify_command)
@@ -70,7 +70,7 @@ buildtest: install-client
 run: 	build
         @CID=$(shell docker run --net=host -d --name $(NAME) $(IMAGE)) && echo $${CID}
 
-test:   
+test:
 	@go test ./tests -v
 
 install-deps:
@@ -83,10 +83,12 @@ start:
 	@docker node inspect self > /dev/null 2>&1 || docker swarm inspect > /dev/null 2>&1 || (echo "> Initializing swarm" && docker swarm init --advertise-addr 127.0.0.1)
 	@docker network ls | grep aNetwork || (echo "> Creating overlay network 'aNetwork'" && docker network create -d overlay aNetwork)
 	@mkdir -p /tmp/blockchain/data
+	@chmod 700 /tmp/blockchain/data
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
+	--detach=true \
 	--mount type=bind,source=/tmp/blockchain/data,target=/data \
-	--replicas=30 \
+	--replicas=5 \
 	$(IMAGE)
 
 
@@ -94,10 +96,12 @@ starttest:
 	@docker node inspect self > /dev/null 2>&1 || docker swarm inspect > /dev/null 2>&1 || (echo "> Initializing swarm" && docker swarm init --advertise-addr 127.0.0.1)
 	@docker network ls | grep aNetwork || (echo "> Creating overlay network 'aNetwork'" && docker network create -d overlay aNetwork)
 	@mkdir -p /tmp/blockchain/data
+	@chmod 700 /tmp/blockchain/data
 	@docker service create --network aNetwork --name antblockchain \
 	--publish 30103:30103 \
+	--detach=true \
 	--mount type=bind,source=/tmp/blockchain/data,target=/data \
-	--replicas=30 \
+	--replicas=5 \
 	$(IMAGETEST)
 
 stop:

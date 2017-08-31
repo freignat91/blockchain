@@ -3,6 +3,7 @@ package gnode
 import (
 	"fmt"
 	"os"
+	"path"
 	"time"
 )
 
@@ -37,7 +38,11 @@ func (t *TreeManager) init(g *GNode) error {
 	t.gnode = g
 	nbEntryByBlock = config.maxEntryNumberPerBlock
 	t.blockMap = make(map[string]*TreeBlockItem)
-	logf.info("Load blockchain tree")
+	if err := os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0700); err != nil {
+		logf.error("Imposible to create the node tree directory: %v\n", err)
+		os.Exit(1)
+	}
+	logf.info("Load blockchain tree: %s", config.rootDataPath)
 	root, err := t.getBlock("root")
 	if err != nil {
 		logf.warn("root blockchain tree doesn't exist (%v)\n", err)

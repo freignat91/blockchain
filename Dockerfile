@@ -25,4 +25,3 @@ RUN cd $GOPATH/src/github.com/freignat91/blockchain && \
 #HEALTHCHECK --interval=10s --timeout=10s --retries=80 CMD /go/bin/server healthcheck
 
 CMD ["/go/bin/server"]
- 

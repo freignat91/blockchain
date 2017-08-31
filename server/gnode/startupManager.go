@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"path"
 	"sort"
 	//"strconv"
 	"strings"
@@ -143,7 +145,7 @@ func (g *gnodeLeader) computeGrid() error {
 		time.Sleep(20 * time.Second)
 	}
 	g.gnode.nbNode = len(g.nodeIPList)
-	//logf.info("IPlist: %v\n", g.nodeIPList)
+	logf.info("IPlist: %v\n", g.nodeIPList)
 
 	g.updateNumber++
 	g.gnode.healthy = false
@@ -163,6 +165,12 @@ func (g *gnodeLeader) setIpList() {
 		if name == g.gnode.name {
 			g.gnode.nodeIndex = i
 			config.rootDataPath = fmt.Sprintf("%s/%s", config.dataPath, name)
+			if err := os.MkdirAll(path.Join(config.rootDataPath, "tree"), 0700); err != nil {
+				logf.error("Imposible to create the node tree directory: %v\n", err)
+				time.Sleep(30 * time.Second)
+				os.Exit(1)
+			}
+			os.MkdirAll(path.Join(config.rootDataPath, "users"), 0700)
 			logf.info("Set dataPath: %s\n", config.rootDataPath)
 		}
 		g.gnode.nodeNameList = append(g.gnode.nodeNameList, name)
